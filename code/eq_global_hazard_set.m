@@ -79,7 +79,7 @@ if ~exist('TEST_epicenter_preselection','var'),TEST_epicenter_preselection=0;end
 % PARAMETERS
 %
 % where we prompt for file open dialogs
-eq_dir=[climada_global.modules_dir filesep 'eq_global' filesep 'data'];
+eq_dir=[fileparts(fileparts(mfilename('fullpath'))) filesep 'data'];
 %
 % since we store the hazard as sparse array, we need an a-priory estimation
 % of it's density
