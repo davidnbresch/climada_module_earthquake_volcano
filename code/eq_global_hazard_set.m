@@ -54,11 +54,11 @@ function hazard=eq_global_hazard_set(eq_data,hazard_set_file,centroids,TEST_epic
 %       arr(event_i,centroid_i),sparse: the hazard intensity of event_i at
 %           centroid_i
 %       frequency(event_i): the frequency of each event
-%       matrix_density: the density of the sparse array hazard.arr
+%       matrix_density: the density of the sparse array hazard.intensity
 %       filename: the filename of the hazard event set (if passed as a
 %           struct, this is often useful)
 %
-%   simple check for hazard content: hist(full(hazard.arr(find(hazard.arr))))
+%   simple check for hazard content: hist(full(hazard.intensity(find(hazard.intensity))))
 % MODIFICATION HISTORY:
 % David N. Bresch, david.bresch@gmail.com, 20141012
 %-
@@ -79,7 +79,7 @@ if ~exist('TEST_epicenter_preselection','var'),TEST_epicenter_preselection=0;end
 % PARAMETERS
 %
 % where we prompt for file open dialogs
-eq_dir=[climada_global.additional_dir filesep 'eq_global' filesep 'data'];
+eq_dir=[climada_global.modules_dir filesep 'eq_global' filesep 'data'];
 %
 % since we store the hazard as sparse array, we need an a-priory estimation
 % of it's density
@@ -189,7 +189,7 @@ hazard.dd               = eq_data.dd;
 hazard.nodetime_mat     = eq_data.nodetime_mat;
 
 % allocate the hazard array (sparse, to manage memory)
-hazard.arr = spalloc(hazard.event_count,length(hazard.lon),...
+hazard.intensity = spalloc(hazard.event_count,length(hazard.lon),...
     ceil(hazard.event_count*length(hazard.lon)*hazard_arr_density));
 
 t0       = clock;
@@ -207,7 +207,7 @@ for event_i=1:n_events
         
         event_i_eff=event_i_eff+1;
         
-        hazard.arr(event_i,:)=eq_global_attenuation(eq_data.glat(event_i),...
+        hazard.intensity(event_i,:)=eq_global_attenuation(eq_data.glat(event_i),...
             eq_data.glon(event_i),eq_data.dep(event_i),eq_data.mag(event_i),...
             centroids);
         
@@ -239,7 +239,7 @@ fprintf('%i original, %i probabilistic years, event frequency = %f\n',orig_years
 
 % not transposed, just regular
 hazard.frequency         = ones(1,hazard.event_count)*event_frequency;
-hazard.matrix_density    = nnz(hazard.arr)/numel(hazard.arr);
+hazard.matrix_density    = nnz(hazard.intensity)/numel(hazard.intensity);
 hazard.eq_comment        = msgstr;
 hazard.peril_ID          = 'EQ';
 hazard.filename          = hazard_set_file;

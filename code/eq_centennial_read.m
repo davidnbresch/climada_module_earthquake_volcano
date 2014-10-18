@@ -53,7 +53,7 @@ if ~exist('check_plot','var'),check_plot=0;end
 % PARAMETERS
 %
 % where we prompt for file open dialogs
-eq_dir=[climada_global.additional_dir filesep 'eq_global' filesep 'data'];
+eq_dir=[climada_global.modules_dir filesep 'eq_global' filesep 'data'];
 %
 % set default value for centennial_file if not given
 centennial_file_default=[eq_dir filesep 'epicenters' filesep 'centennial_Y2K.CAT.txt'];
