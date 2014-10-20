@@ -29,7 +29,7 @@ function hazard=eq_global_hazard_set(eq_data,hazard_set_file,centroids,TEST_epic
 %       which case climada_centroids_read is called.
 %       > promted for .mat or .xls filename if not given
 %       NOTE: if you then select Cancel, a regular default grid is used
-%       (TEST mode), see hard-wired definition in code
+%       (TEST mode), see hard-wired definition in code (a rectangular area in California)
 %   TEST_epicenter_preselection: whether we show the epicenters selected
 %       for processing (=1) or not (=0, default)
 %       if =2, STOP after plot of preselection (to check preselection only)
@@ -109,7 +109,7 @@ end
 
 % prompt for hazard_set_file if not given
 if isempty(hazard_set_file) && TEST_epicenter_preselection<2 % local GUI
-    hazard_set_file      = [eq_dir filesep 'hazards' filesep 'EQXX_hazard.mat'];
+    hazard_set_file      = [climada_global.data_dir filesep 'hazards' filesep 'EQXX_hazard.mat'];
     [filename, pathname] = uiputfile(hazard_set_file, 'Save EQ hazard set as:');
     if isequal(filename,0) || isequal(pathname,0)
         return; % cancel

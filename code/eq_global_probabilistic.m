@@ -36,7 +36,7 @@ function eq_data=eq_global_probabilistic(eq_data_in,ens_size,check_plot)
 
 eq_data=[]; % init
 
-%%global climada_global
+%global climada_global
 if ~climada_init_vars,return;end % init/import global variables
 
 %%if climada_global.verbose_mode,fprintf('*** %s ***\n',mfilename);end % show routine name on stdout

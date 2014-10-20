@@ -42,7 +42,7 @@ function eq_data=eq_centennial_read(centennial_file,check_plot)
 
 eq_data=[]; % init
 
-global climada_global
+%global climada_global
 if ~climada_init_vars,return;end % init/import global variables
 
 %%if climada_global.verbose_mode,fprintf('*** %s ***\n',mfilename);end % show routine name on stdout
