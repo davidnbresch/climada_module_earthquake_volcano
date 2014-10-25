@@ -195,11 +195,18 @@ hazard.intensity = spalloc(hazard.event_count,length(hazard.lon),...
 t0       = clock;
 n_events = hazard.event_count;
 n_events_eff=sum(in_centroids_poly);
+
 msgstr   = sprintf('processing %i (of globally %i) epicenters',n_events_eff,n_events);
-fprintf('%s (updating waitbar with estimation of time remaining every 100th epicenter)\n',msgstr);
-h        = waitbar(0,msgstr);
-set(h,'Name','Hazard EQ: shaking intensity (MMI)');
-mod_step = 10; % first time estimate after 10 tracks, then every 100
+if climada_global.waitbar
+    fprintf('%s (updating waitbar with estimation of time remaining every 100th epicenter)\n',msgstr);
+    h        = waitbar(0,msgstr);
+    set(h,'Name','Hazard EQ: shaking intensity (MMI)');
+    mod_step = 10; % first time estimate after 10 events, then every 100
+else
+    fprintf('%s (waitbar suppressed)\n',msgstr);
+    mod_step=n_events+10;
+end
+
 event_i_eff=0; % since we only process a subset
 for event_i=1:n_events
     
@@ -227,7 +234,7 @@ for event_i=1:n_events
     end % in_centroids_poly
     
 end %event_i
-close(h); % dispose waitbar
+if exist('h','var'),close(h);end % dispose waitbar
 
 t_elapsed = etime(clock,t0);
 msgstr    = sprintf('processing %i epicenters took %3.2f min (%3.4f sec/event)',n_events_eff,t_elapsed/60,t_elapsed/n_events_eff);
