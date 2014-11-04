@@ -74,7 +74,7 @@ end
 if ~exist(signigeq_file,'file'),fprintf('ERROR: file %s not found\n',signigeq_file);return;end
 signigeq_file_mat=strrep(signigeq_file,'.xlsx','.mat');
 
-if ~exist(signigeq_file_mat,'file')
+if ~climada_check_matfile(signigeq_file,signigeq_file_mat)
     
     fprintf('reading raw data from %s ...\n',signigeq_file);
     eq_data_raw=climada_xlsread(0,signigeq_file,'results1',0);

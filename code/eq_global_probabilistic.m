@@ -6,7 +6,7 @@ function eq_data=eq_global_probabilistic(eq_data_in,ens_size,check_plot)
 %   Given an earthquake(EQ) database, create a probabilistic version by
 %   wiggling location, depth and magnitudes of epicenters
 %
-%   previous step: see eq_centennial_read
+%   previous step: see eq_centennial_read or eq_signigeq_read
 %   next step: see eq_global_hazard_set
 % CALLING SEQUENCE:
 %   eq_data=eq_global_probabilistic(eq_data_in,check_plot)
@@ -118,9 +118,9 @@ eq_data_in.mag=eq_data_in.mag+min_mag; % just for safety
 eq_data.mag=eq_data.mag+min_mag;
 
 try
-    centennial_file_prob_mat=strrep(eq_data_in.filename,'.txt','_prob.mat');
-    fprintf('probabalistic set stored as %s\n',centennial_file_prob_mat);
-    save(centennial_file_prob_mat,'eq_data');
+    epicenters_file_prob_mat=strrep(eq_data_in.filename,'.txt','_prob.mat');
+    fprintf('probabalistic set stored as %s\n',epicenters_file_prob_mat);
+    save(epicenters_file_prob_mat,'eq_data');
 catch
     fprintf('WARNING: failed to save probabilistic epicenters\n');
 end

@@ -74,7 +74,8 @@ end
 if ~exist(centennial_file,'file'),fprintf('ERROR: file %s not found\n',centennial_file);return;end
 centennial_file_mat=strrep(centennial_file,'.txt','.mat');
 
-if ~exist(centennial_file_mat,'file')
+if ~climada_check_matfile(centennial_file,centennial_file_mat)
+    
     fid=fopen(centennial_file,'r');
     
     % init
