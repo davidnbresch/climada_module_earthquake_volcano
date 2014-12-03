@@ -4,3 +4,7 @@ data/epicenters/centennial_Y2K.CAT_prob.mat
 data/epicenters/centennial_Y2K.CAT.mat
 
 data/epicenters/signigeq_CLEAN.mat
+
+data/epicenters/isc-gem-cat.mat
+
+docs/eq_global_manual.docx

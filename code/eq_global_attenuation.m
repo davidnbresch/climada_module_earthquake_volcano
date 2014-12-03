@@ -1,4 +1,4 @@
-function intensity_at_centroids = eq_global_attenuation(glat,glon,dep,mag,centroids,check_plot)
+function intensity_at_centroids = eq_global_attenuation(glat,glon,dep,mag,centroids,check_plot,a1,a2,a3,a4)
 % eq attenuation calculation footprint
 % NAME:
 %   eq_global_attenuation
@@ -16,12 +16,16 @@ function intensity_at_centroids = eq_global_attenuation(glat,glon,dep,mag,centro
 %   To test attenuation functions, see eq_global_attenuation_TEST
 %   then edit between *********** lines beow
 %
-%   mainly called from: eq_hazard_set
+%   mainly called from: eq_global_hazard_set
 % CALLING SEQUENCE:
-%   intensity_at_centroids = eq_global_attenuation(glat,glon,dep,mag,centroids,check_plot)
+%   intensity_at_centroids = eq_global_attenuation(glat,glon,dep,mag,centroids,check_plot,a1,a2,a3,a4)
 % EXAMPLE:
-%   centroids.Longitude=10;centroids.Latitude=45;
-%   intensity_at_centroids = eq_global_attenuation(24,10,5,6,centroids,1)
+%   for an earthquake in Vancouver, Canada:
+%   glat=49.25;glon=-123.10;
+%   intensity_at_centroids = eq_global_attenuation(glat,glon,5,6,centroids,1, 2.4,1.5,1.13,0.0063)
+%   The parameters a1=2.4, a2=1.5, a3=1.13, a4=0.0063 describe the
+%   attenuation function for Western Canada; see
+%   eq_global-master/data/system/attenuation_parameters.xlsx
 % INPUTS:
 %   glat: latitude of epicenter [in degrees]
 %   glon: longitude of epicenter [in degrees]
@@ -31,16 +35,27 @@ function intensity_at_centroids = eq_global_attenuation(glat,glon,dep,mag,centro
 %       centroids.Latitude: the latitude of the centroids
 %       centroids.Longitude: the longitude of the centroids
 % OPTIONAL INPUT PARAMETERS:
+%   a1,a2,a3,a4: parameters defining the attenuation function. See
+%   eq_global-master/data/system/attenuation_parameters.xlsx to use
+%   parameters for specific regions; otherwise default values representing
+%   a "global average attenuation function" will be used
 %   check_plot: =1, if a check plot shall be drawn (default=0)
 % OUTPUTS:
 %   intensity_at_centroids: the MMI at centroids
 % RESTRICTIONS:
 %   code does not quality or even consistency checks, optimized for speed.
 % MODIFICATION HISTORY:
+% Melanie Bieli, melanie.bieli@bluewin.ch, 20141106
 % David N. Bresch, david.bresch@gmail.com, 20141013
 %-
 
 intensity_at_centroids = []; % init output
+
+%% default values for attenuation parameters a1, a2, a3, a4
+if ~exist('a1','var') || isempty(a1), a1 = 1.67;       end
+if ~exist('a2','var') || isempty(a2), a2 = 1.67;       end
+if ~exist('a3','var') || isempty(a3), a3 = 1.3;        end
+if ~exist('a4','var') || isempty(a4), a4 = 0.0026;     end
 
 %global climada_global % currently not used
 if ~climada_init_vars, return; end
@@ -58,35 +73,34 @@ intensity_at_centroids = centroids.Longitude*0; % init output
 %
 % in order to speed up, we do not calculate intensity too far away from epicenter
 % note that 1 deg (at equator) is approx 111.12km
-max_centroids_dist=2; % max disatance in degrees to epicenter we calculate intensity
-%
-% calculate square of distance of all centroids from epicenter
-centroids_dist2=((glon-centroids.Longitude).*cos(glat/180*pi)).^2+(glat-centroids.Latitude).^2; % in deg^2
+max_centroids_dist = 400; % max distance to epicenter we calculate intensity (in km)
 
-eff_centroids=find(centroids_dist2<(max_centroids_dist^2)); % still in deg^2
-centroids_dist2(centroids_dist2<=1)=1; % all within 1 km shows center intensity
+% Great circle distance of centroids from epicenter using the spherical law 
+% of cosines (see http://en.wikipedia.org/wiki/Great-circle_distance)
+% Calculates the radial distance between the epicenter and all centroids
+R_mean_Earth = 6371;    % the Earth's mean radius (in km)
+glat_rad = degtorad(glat);
+glon_rad = degtorad(glon);
+raddist = acos(sin(glat_rad)*sin(degtorad(centroids.Latitude)) + cos(glat_rad)*cos(degtorad(centroids.Latitude)).*cos(degtorad(centroids.Longitude)-glon_rad));
+if raddist < 0 
+   raddist = raddist + pi;
+end
+centroids_dist = R_mean_Earth * raddist;    
 
-for centroid_ii=1:length(eff_centroids) % now loop over all centroids close enough
+% Only look at centroids within the defined maximum distance from epicenter
+eff_centroids=find(centroids_dist<(max_centroids_dist)); 
+    
+for centroid_ii=1:length(eff_centroids) %
+    %now loop over all centroids close enough
     
     centroid_i=eff_centroids(centroid_ii); % index in centroids
     
-    R = centroids_dist2(centroid_i); % hypocentral distance (km), here still square of
-    
-    if R>1 % only take square root if >1 for speedup
-        R = sqrt(R)*111.12; % now in km
-    end
-    
+    R = centroids_dist(centroid_i); % epicentral distance [km]
+
     % ********************************************************************
-    % Po-Shen Lin and Chyi-Tyi Lee, 2008: Ground-Motion Attenuation
-    % Relationships for Subduction-Zone Earthquakes in Northeastern Taiwan,
-    % Bulletin of the Seismological Society of America, Vol. 98, No. 1, pp.
-    % 220?240, February 2008, doi: 10.1785/0120060002
-    % formulas 13 and 14 (p 226) and table 3/4 (p 227/228)
-    % Zt= 0 for interface earthquakes, and Zt=1 for intraslab earthquakes
-    M=mag;H=dep; % common names in paper, Zt ignored
-    lnPGA_soil = -0.900 +1.000*M -1.900*log(R +0.99178*exp(0.52632*M)) +0.0040*H; % +0.310*Zt; % soil sites
-    
-    intensity_at_centroids(centroid_i) = exp(lnPGA_soil);
+    % calling the function simple_eq_MMI to calculate the intensity at the
+    % centroids
+    intensity_at_centroids(centroid_i) = simple_eq_MMI(mag, R, a1, a2, a3, a4);    
     % ********************************************************************
     
 end % centroid_ii
@@ -95,14 +109,13 @@ if check_plot
     
     fprintf('max MMI: %f\n',max(intensity_at_centroids));
     fprintf('preparing footprint plot\n')
-    
     % create gridded values
     [X, Y, gridded_VALUE] = climada_gridded_VALUE(intensity_at_centroids,centroids);
+    fprintf('gridded values %f\n',gridded_VALUE);
     gridded_max = max(max(gridded_VALUE));
     gridded_max_round = gridded_max; % 90
-    
     contourf(X, Y, full(gridded_VALUE),...
-        0:10:gridded_max_round,'edgecolor','none')
+        2:gridded_max_round,'edgecolor','none')
     hold on
     climada_plot_world_borders(0.7)
     
@@ -111,7 +124,7 @@ if check_plot
     axis equal
     axis([min(centroids.Longitude) max(centroids.Longitude) ...
         min(centroids.Latitude)  max(centroids.Latitude)]);
-    caxis([0 gridded_max_round])
+    caxis([2 gridded_max_round])
     colorbar
 end
 

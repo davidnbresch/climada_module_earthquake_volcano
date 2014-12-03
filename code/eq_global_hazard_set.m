@@ -1,11 +1,11 @@
-function hazard=eq_global_hazard_set(eq_data,hazard_set_file,centroids,TEST_epicenter_preselection)
+function hazard=eq_global_hazard_set(eq_data,hazard_set_file,centroids,TEST_epicenter_preselection,a1,a2,a3,a4)
 % climada
 % NAME:
 %   eq_global_hazard_set
 % PURPOSE:
 %   generate an earthqake (EQ) hazard event set, starting from epicenters
 %   calculating attenuation (distance and depth) to convert Richter
-%   magnitude to a modified Mercally intensiyt (MMI)
+%   magnitude to a modified Mercally intensity (MMI)
 %
 %   previous step: see eq_global_probabilistic (or eq_centennial_read)
 % CALLING SEQUENCE:
@@ -33,6 +33,11 @@ function hazard=eq_global_hazard_set(eq_data,hazard_set_file,centroids,TEST_epic
 %   TEST_epicenter_preselection: whether we show the epicenters selected
 %       for processing (=1) or not (=0, default)
 %       if =2, STOP after plot of preselection (to check preselection only)
+%   a1,a2,a3,a4: parameters defining the attenuation function. See
+%   eq_global-master/data/system/attenuation_parameters.xlsx to use
+%   parameters for specific regions; otherwise the function
+%   eq_global_attenuation will use default values that represent a "global
+%   average attenuation function"
 % OUTPUTS:
 %   hazard: a struct, the hazard event set, more for tests, since the
 %       hazard set is stored as hazard_set_file, see code
@@ -68,13 +73,19 @@ hazard=[]; % init
 global climada_global
 if ~climada_init_vars,return;end % init/import global variables
 
-%%if climada_global.verbose_mode,fprintf('*** %s ***\n',mfilename);end % show routine name on stdout
+%if climada_global.verbose_mode,fprintf('*** %s ***\n',mfilename);end % show routine name on stdout
 
 % poor man's version to check arguments
 if ~exist('eq_data','var'),eq_data=[];end
 if ~exist('hazard_set_file','var'),hazard_set_file=[];end
 if ~exist('centroids','var'),centroids=[];end
 if ~exist('TEST_epicenter_preselection','var'),TEST_epicenter_preselection=0;end
+
+% default values for attenuation parameters a1, a2, a3, a4
+if ~exist('a1','var') || isempty(a1), a1 = 1.67;       end
+if ~exist('a2','var') || isempty(a2), a2 = 1.67;       end
+if ~exist('a3','var') || isempty(a3), a3 = 1.3;        end
+if ~exist('a4','var') || isempty(a4), a4 = 0.0026;     end
 
 % PARAMETERS
 %
@@ -88,7 +99,7 @@ hazard_arr_density=0.03; % 3% sparse hazard array density (estimated)
 % define the reference year for this hazard set
 hazard_reference_year = climada_global.present_reference_year; % does not really matter for EQ
 %
-% the eqrthquake epicenter preselection margin, i.e. to widen the box
+% the earthquake epicenter preselection margin, i.e. to widen the box
 % around the centroids by EPM degrees.
 EPM=2; % in degrees, default=2 (approx. 200km)
 
@@ -216,7 +227,7 @@ for event_i=1:n_events
         
         hazard.intensity(event_i,:)=eq_global_attenuation(eq_data.glat(event_i),...
             eq_data.glon(event_i),eq_data.dep(event_i),eq_data.mag(event_i),...
-            centroids);
+            centroids, 0, a1,a2,a3,a4);
         
         if mod(event_i_eff,mod_step)==0
             mod_step          = 100;

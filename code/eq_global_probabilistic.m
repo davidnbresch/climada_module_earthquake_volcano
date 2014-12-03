@@ -6,7 +6,7 @@ function eq_data=eq_global_probabilistic(eq_data_in,ens_size,check_plot)
 %   Given an earthquake(EQ) database, create a probabilistic version by
 %   wiggling location, depth and magnitudes of epicenters
 %
-%   previous step: see eq_centennial_read or eq_signigeq_read
+%   previous step: see eq_isc_gem_read, eq_centennial_read, or eq_signigeq_read
 %   next step: see eq_global_hazard_set
 % CALLING SEQUENCE:
 %   eq_data=eq_global_probabilistic(eq_data_in,check_plot)
