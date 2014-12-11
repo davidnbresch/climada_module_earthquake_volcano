@@ -35,6 +35,7 @@ function eq_data=eq_isc_gem_read(isc_gem_file,check_plot)
 %   to re-read from the original .csv file 
 % MODIFICATION HISTORY:
 % Melanie Bieli, melanie.bieli@bluewin.ch, 20141117
+% David N. Bresch, david.bresch@gmail.com, 20141210, date conversion revised
 %-
 
 eq_data=[]; % initialize output
@@ -57,6 +58,8 @@ if isempty(isc_gem_file),isc_gem_file=isc_gem_file_default;end
 if ~exist(isc_gem_file,'file')
     [filename, pathname] = uigetfile(isc_gem_file_default,'Choose ISC-GEM epicenter database:');
     if isequal(filename,0) || isequal(pathname,0)
+        fprintf('No ISC-GEM epicenter database selected, consider downloading eq_global module again\n');
+        fprintf('> See https://github.com/davidnbresch/climada_module_eq_global\n');
         return; % cancel
     else
         isc_gem_file=fullfile(pathname,filename);
@@ -132,13 +135,21 @@ if ~climada_check_matfile(isc_gem_file,isc_gem_file_mat)
     
     % construct eq_data by extracting the variables of interest from data
     formatIn = 'yyyy-mm-dd HH:MM:SS';
-    data{index_date} = datenum(data{index_date},formatIn); 
-    eq_data.yyyy = year(data{index_date}');
-    eq_data.mm = month(data{index_date}');
-    eq_data.dd = day(data{index_date}');
-    eq_data.hr = hour(data{index_date}');
-    eq_data.min = minute(data{index_date}');
-    eq_data.sec = second(data{index_date}');
+    datenum_data = datenum(data{index_date},formatIn); 
+    eq_data.yyyy=str2num(datestr(datenum_data,'yyyy'))';
+    eq_data.mm=str2num(datestr(datenum_data,'mm'))';
+    eq_data.dd=str2num(datestr(datenum_data,'dd'))';
+    eq_data.hr=str2num(datestr(datenum_data,'HH'))';
+    eq_data.min=str2num(datestr(datenum_data,'MM'))';
+    eq_data.sec=str2num(datestr(datenum_data,'SS'))';
+    
+    % following makes use of \toolbox\finance\calendar... not possible
+    %     eq_data.yyyy = year(data{index_date}');
+    %     eq_data.mm = month(data{index_date}');
+    %     eq_data.dd = day(data{index_date}');
+    %     eq_data.hr = hour(data{index_date}');
+    %     eq_data.min = minute(data{index_date}');
+    %     eq_data.sec = second(data{index_date}');
     eq_data.glat = str2double(data{index_lat}');
     eq_data.glon = str2double(data{index_lon}');
     eq_data.dep = str2double(data{index_depth}');
