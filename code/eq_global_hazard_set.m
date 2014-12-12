@@ -164,6 +164,17 @@ if ~isstruct(centroids) % load, if filename given
     load(centroids_file); % contains centrois as a variable
 end
 
+if exist('entity','var') % the centroids_file contains in fact an entity, not centroids
+    centroids.Latitude =entity.assets.Latitude;
+    centroids.Longitude=entity.assets.Longitude;
+    centroids.centroid_ID=1:length(centroids.Longitude);
+    if isfield(entity.assets,'country_name'),centroids.country_name{1}=entity.assets.country_name;end
+    if isfield(entity.assets,'admin0_name'),centroids.admin0_name{1}=entity.assets.admin0_name;end
+    if isfield(entity.assets,'admin0_ISO3'),centroids.admin0_ISO3{1}=entity.assets.admin0_ISO3;end
+    if isfield(entity.assets,'admin1_name'),centroids.admin1_name{1}=entity.assets.admin1_name;end
+    clear entity
+end
+
 % figure which epicenters can affect the region
 centroids_rect = [min(centroids.Longitude)-EPM max(centroids.Longitude)+EPM min(centroids.Latitude)-EPM max(centroids.Latitude)+EPM];
 centroids_edges_x = [centroids_rect(1), centroids_rect(1), centroids_rect(2), centroids_rect(2)];
