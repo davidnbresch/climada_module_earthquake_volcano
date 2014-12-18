@@ -119,7 +119,7 @@ eq_data.mag=eq_data.mag+min_mag;
 
 try
     epicenters_file_prob_mat=strrep(eq_data_in.filename,'.txt','_prob.mat');
-    fprintf('probabalistic set stored as %s\n',epicenters_file_prob_mat);
+    fprintf('probabilistic set stored as %s\n',epicenters_file_prob_mat);
     save(epicenters_file_prob_mat,'eq_data');
 catch
     fprintf('WARNING: failed to save probabilistic epicenters\n');

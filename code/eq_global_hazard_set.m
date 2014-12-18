@@ -164,6 +164,11 @@ if ~isstruct(centroids) % load, if filename given
     load(centroids_file); % contains centrois as a variable
 end
 
+if isfield(centroids,'assets') % an entity instead of centroids passed
+    entity=centroids; % store
+    clear centroids
+end
+
 if exist('entity','var') % the centroids_file contains in fact an entity, not centroids
     centroids.Latitude =entity.assets.Latitude;
     centroids.Longitude=entity.assets.Longitude;
