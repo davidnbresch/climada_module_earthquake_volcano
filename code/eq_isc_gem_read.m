@@ -8,6 +8,12 @@ function eq_data=eq_isc_gem_read(isc_gem_file,check_plot)
 %   for further information on the earthquake catalogue, see
 %   www.isc.ac.uk/iscgem/index.php
 %
+%   Note: it can sometimes happen that the original epicenters file
+%   isc-gem-cat.csv gets currupted. Just donwload it from
+%   www.isc.ac.uk/iscgem/download.php (or directly
+%   http://colossus.iris.washington.edu/iscgem/download/isc-gem-cat.zip)
+%   again. 
+%
 %   next step: see eq_global_probabilistic
 % CALLING SEQUENCE:
 %   eq_data=eq_isc_gem_read(isc_gem_file,check_plot)
@@ -36,6 +42,7 @@ function eq_data=eq_isc_gem_read(isc_gem_file,check_plot)
 % MODIFICATION HISTORY:
 % Melanie Bieli, melanie.bieli@bluewin.ch, 20141117
 % David N. Bresch, david.bresch@gmail.com, 20141210, date conversion revised
+% David N. Bresch, david.bresch@gmail.com, 20141223, issue with .csv file noted
 %-
 
 eq_data=[]; % initialize output
@@ -69,7 +76,8 @@ end
 if ~exist(isc_gem_file,'file'),fprintf('ERROR: file %s not found\n',isc_gem_file);return;end
 
 % Check whether there is already a .mat file containing the epicenter data
-isc_gem_file_mat=strrep(isc_gem_file,'.csv','.mat');
+[fP,fN]=fileparts(isc_gem_file);
+isc_gem_file_mat=[fP filesep fN '.mat'];
 
 if ~climada_check_matfile(isc_gem_file,isc_gem_file_mat)
 
@@ -135,6 +143,9 @@ if ~climada_check_matfile(isc_gem_file,isc_gem_file_mat)
     
     % construct eq_data by extracting the variables of interest from data
     formatIn = 'yyyy-mm-dd HH:MM:SS';
+    
+    % Note: in case an ERROR shows in the next line, download the
+    % epicenters file (isc-gem-cat.csv) again.
     datenum_data = datenum(data{index_date},formatIn); 
     eq_data.yyyy=str2num(datestr(datenum_data,'yyyy'))';
     eq_data.mm=str2num(datestr(datenum_data,'mm'))';
@@ -143,13 +154,6 @@ if ~climada_check_matfile(isc_gem_file,isc_gem_file_mat)
     eq_data.min=str2num(datestr(datenum_data,'MM'))';
     eq_data.sec=str2num(datestr(datenum_data,'SS'))';
     
-    % following makes use of \toolbox\finance\calendar... not possible
-    %     eq_data.yyyy = year(data{index_date}');
-    %     eq_data.mm = month(data{index_date}');
-    %     eq_data.dd = day(data{index_date}');
-    %     eq_data.hr = hour(data{index_date}');
-    %     eq_data.min = minute(data{index_date}');
-    %     eq_data.sec = second(data{index_date}');
     eq_data.glat = str2double(data{index_lat}');
     eq_data.glon = str2double(data{index_lon}');
     eq_data.dep = str2double(data{index_depth}');
