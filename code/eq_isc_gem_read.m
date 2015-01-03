@@ -160,7 +160,7 @@ if ~climada_check_matfile(isc_gem_file,isc_gem_file_mat)
     eq_data.mag = str2double(data{index_mw}');
 
     % add further information: serial date number, filename etc.
-    eq_data.nodetime_mat=datenum(eq_data.yyyy,eq_data.mm,eq_data.dd,eq_data.hr,eq_data.min,eq_data.sec);
+    eq_data.datenum=datenum(eq_data.yyyy,eq_data.mm,eq_data.dd,eq_data.hr,eq_data.min,eq_data.sec);
     eq_data.filename=isc_gem_file;
     eq_data.orig_event_flag=eq_data.yyyy*0+1;
     eq_data.n_epicenters_orig=length(eq_data.yyyy);

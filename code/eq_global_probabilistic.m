@@ -74,7 +74,7 @@ eq_data.dd=eq_data_in.dd;
 eq_data.hr=eq_data_in.hr;
 eq_data.min=eq_data_in.min;
 eq_data.sec=eq_data_in.sec;
-eq_data.nodetime_mat=eq_data_in.nodetime_mat;
+eq_data.datenum=eq_data_in.datenum;
 eq_data.n_epicenters_orig=n_epicenters;
 eq_data.ens_size=ens_size;
 % allocate memory
@@ -110,7 +110,7 @@ for ens_i=1:ens_size
     eq_data.hr(ens_i*n_epicenters+1:(ens_i+1)*n_epicenters)=eq_data_in.hr;
     eq_data.min(ens_i*n_epicenters+1:(ens_i+1)*n_epicenters)=eq_data_in.min;
     eq_data.sec(ens_i*n_epicenters+1:(ens_i+1)*n_epicenters)=eq_data_in.sec;
-    eq_data.nodetime_mat(ens_i*n_epicenters+1:(ens_i+1)*n_epicenters)=eq_data_in.nodetime_mat;
+    eq_data.datenum(ens_i*n_epicenters+1:(ens_i+1)*n_epicenters)=eq_data_in.datenum;
 end % ens_i
 
 % set magnitude back

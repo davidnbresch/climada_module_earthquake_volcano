@@ -213,7 +213,7 @@ hazard.orig_event_flag(1:hazard.orig_event_count)=1;
 hazard.yyyy             = eq_data.yyyy;
 hazard.mm               = eq_data.mm;
 hazard.dd               = eq_data.dd;
-hazard.nodetime_mat     = eq_data.nodetime_mat;
+hazard.datenum          = eq_data.datenum;
 
 % allocate the hazard array (sparse, to manage memory)
 hazard.intensity = spalloc(hazard.event_count,length(hazard.lon),...
@@ -281,8 +281,10 @@ hazard.comment           = sprintf('EQ hazard event set, generated %s',datestr(n
 hazard.date              = datestr(now);
 
 fprintf('saving EQ hazard set as %s\n',hazard_set_file); % Octave compatible
-save(hazard_set_file,'hazard'); % see note on next line:
-%save(hazard_set_file,'hazard','-v7.3'); % see note on next line:
-% Warning: Variable 'hazard' cannot be saved to a MAT-file whose version is older than 7.3. To save this variable, use the -v7.3 switch.
-% to avoid this warning, the switch is used. david's comment: only shows for large hazard sets, seems to be due to huge size of hazard
+save(hazard_set_file,'hazard','-7'); % see note on next line:
+% Warning: Variable 'hazard' cannot be saved to a MAT-file whose version is
+% older than 7.3. To save this variable, use the -v7.3 switch. to avoid
+% this warning, the switch is used. david's comment: only shows for large
+% hazard sets, seems to be due to huge size of hazard. Since Octave does
+% not like -v7.3, we use -v7
 return
