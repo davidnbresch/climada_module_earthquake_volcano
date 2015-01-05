@@ -281,7 +281,7 @@ hazard.comment           = sprintf('EQ hazard event set, generated %s',datestr(n
 hazard.date              = datestr(now);
 
 fprintf('saving EQ hazard set as %s\n',hazard_set_file); % Octave compatible
-save(hazard_set_file,'hazard','-7'); % see note on next line:
+save(hazard_set_file,'hazard','-v7'); % see note on next line:
 % Warning: Variable 'hazard' cannot be saved to a MAT-file whose version is
 % older than 7.3. To save this variable, use the -v7.3 switch. to avoid
 % this warning, the switch is used. david's comment: only shows for large
