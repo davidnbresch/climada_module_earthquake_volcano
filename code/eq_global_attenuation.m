@@ -1,5 +1,6 @@
-function intensity_at_centroids = eq_global_attenuation(glat,glon,dep,mag,centroids,check_plot,a1,a2,a3,a4)
-% eq attenuation calculation footprint
+function intensity_at_centroids = eq_global_attenuation(glat,glon,mag,centroids,check_plot,dep,correction,a1,a2,a3,a4)
+% MODULE:
+% eq_global
 % NAME:
 %   eq_global_attenuation
 % PURPOSE:
@@ -22,7 +23,7 @@ function intensity_at_centroids = eq_global_attenuation(glat,glon,dep,mag,centro
 % EXAMPLE:
 %   for an earthquake in Vancouver, Canada:
 %   glat=49.25;glon=-123.10;
-%   intensity_at_centroids = eq_global_attenuation(glat,glon,5,6,centroids,1, 2.4,1.5,1.13,0.0063)
+%   intensity_at_centroids = eq_global_attenuation(glat,glon,5,6,centroids,0,1,2.4,1.5,1.13,0.0063)
 %   The parameters a1=2.4, a2=1.5, a3=1.13, a4=0.0063 describe the
 %   attenuation function for Western Canada; see
 %   eq_global-master/data/system/attenuation_parameters.xlsx
@@ -35,7 +36,7 @@ function intensity_at_centroids = eq_global_attenuation(glat,glon,dep,mag,centro
 %       centroids.Latitude: the latitude of the centroids
 %       centroids.Longitude: the longitude of the centroids
 % OPTIONAL INPUT PARAMETERS:
-%   a1,a2,a3,a4: parameters defining the attenuation function. See
+%   correction,a1,a2,a3,a4: parameters defining the attenuation function. See
 %   eq_global-master/data/system/attenuation_parameters.xlsx to use
 %   parameters for specific regions; otherwise default values representing
 %   a "global average attenuation function" will be used
@@ -45,17 +46,20 @@ function intensity_at_centroids = eq_global_attenuation(glat,glon,dep,mag,centro
 % RESTRICTIONS:
 %   code does not quality or even consistency checks, optimized for speed.
 % MODIFICATION HISTORY:
-% Melanie Bieli, melanie.bieli@bluewin.ch, 20141106
 % David N. Bresch, david.bresch@gmail.com, 20141013
+% Melanie Bieli, melanie.bieli@bluewin.ch, 20141106
 %-
 
-intensity_at_centroids = []; % init output
+%% initialize output
+intensity_at_centroids = []; 
 
-%% default values for attenuation parameters a1, a2, a3, a4
-if ~exist('a1','var') || isempty(a1), a1 = 1.67;       end
-if ~exist('a2','var') || isempty(a2), a2 = 1.67;       end
-if ~exist('a3','var') || isempty(a3), a3 = 1.3;        end
-if ~exist('a4','var') || isempty(a4), a4 = 0.0026;     end
+%% default values for attenuation parameters: dep, correction, a1, a2, a3, a4
+if ~exist('dep','var') || isempty(dep), dep = 0; end
+if ~exist('correction','var') || isempty(correction), correction = 0; end
+if ~exist('a1','var') || isempty(a1), a1 = 1.7; end
+if ~exist('a2','var') || isempty(a2), a2 = 1.5; end
+if ~exist('a3','var') || isempty(a3), a3 = 1.1726; end
+if ~exist('a4','var') || isempty(a4), a4 = 0.00106; end
 
 %global climada_global % currently not used
 if ~climada_init_vars, return; end
@@ -73,7 +77,7 @@ intensity_at_centroids = centroids.Longitude*0; % init output
 %
 % in order to speed up, we do not calculate intensity too far away from epicenter
 % note that 1 deg (at equator) is approx 111.12km
-max_centroids_dist = 400; % max distance to epicenter we calculate intensity (in km)
+max_centroids_dist = 150; % max distance to epicenter we calculate intensity (in km)
 
 % Great circle distance of centroids from epicenter using the spherical law 
 % of cosines (see http://en.wikipedia.org/wiki/Great-circle_distance)
@@ -98,9 +102,9 @@ for centroid_ii=1:length(eff_centroids) %
     R = centroids_dist(centroid_i); % epicentral distance [km]
 
     % ********************************************************************
-    % calling the function simple_eq_MMI to calculate the intensity at the
+    % calling the function MMI_attenuation_calc to calculate the intensity at the
     % centroids
-    intensity_at_centroids(centroid_i) = simple_eq_MMI(mag, R, a1, a2, a3, a4);    
+    intensity_at_centroids(centroid_i) = MMI_attenuation_calc(mag, R, dep, correction, a1, a2, a3, a4);    
     % ********************************************************************
     
 end % centroid_ii
@@ -111,7 +115,7 @@ if check_plot
     fprintf('preparing footprint plot\n')
     % create gridded values
     [X, Y, gridded_VALUE] = climada_gridded_VALUE(intensity_at_centroids,centroids);
-    fprintf('gridded values %f\n',gridded_VALUE);
+    %fprintf('gridded values %f\n',gridded_VALUE);
     gridded_max = max(max(gridded_VALUE));
     gridded_max_round = gridded_max; % 90
     contourf(X, Y, full(gridded_VALUE),...

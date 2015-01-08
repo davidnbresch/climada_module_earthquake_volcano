@@ -1,5 +1,6 @@
 function single_eq_event = climada_get_single_event(eq_data, event_i)
-
+% MODULE:
+% eq_global
 % NAME:
 %   climada_get_single_event
 % PURPOSE:

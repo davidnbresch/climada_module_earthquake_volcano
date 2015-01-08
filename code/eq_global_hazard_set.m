@@ -1,20 +1,22 @@
-function hazard=eq_global_hazard_set(eq_data,hazard_set_file,centroids,TEST_epicenter_preselection,a1,a2,a3,a4)
-% climada
+function hazard=eq_global_hazard_set(eq_data,hazard_set_file,centroids,TEST_epicenter_preselection, dep, correction,a1,a2,a3,a4)
+% MODULE
+% eq_global
 % NAME:
 %   eq_global_hazard_set
 % PURPOSE:
 %   generate an earthqake (EQ) hazard event set, starting from epicenters
 %   calculating attenuation (distance and depth) to convert Richter
-%   magnitude to a modified Mercally intensity (MMI)
+%   magnitude to a modified Mercalli intensity (MMI)
 %
-%   previous step: see eq_global_probabilistic (or eq_centennial_read)
+%   previous step: see eq_global_probabilistic or eq_isc_gem_read (or
+%   eq_centennial_read, or eq_signieq_read)
 % CALLING SEQUENCE:
 %   hazard=eq_global_hazard_set(eq_data,hazard_set_file,centroids)
 % EXAMPLE:
-%   hazard=eq_global_hazard_set(eq_global_probabilistic(eq_centennial_read))
+%   hazard=eq_global_hazard_set(eq_global_probabilistic(eq_isc_gem_read))
 % INPUTS:
 % OPTIONAL INPUT PARAMETERS:
-%   eq_data: a structure with EQ epicenters, see eq_centennial_read
+%   eq_data: a structure with EQ epicenters, see eq_isc_gem_read
 %       > promted for if not given
 %   hazard_set_file: the name and path of the hazard set file
 %       > promted for if not given
@@ -33,11 +35,12 @@ function hazard=eq_global_hazard_set(eq_data,hazard_set_file,centroids,TEST_epic
 %   TEST_epicenter_preselection: whether we show the epicenters selected
 %       for processing (=1) or not (=0, default)
 %       if =2, STOP after plot of preselection (to check preselection only)
-%   a1,a2,a3,a4: parameters defining the attenuation function. See
-%   eq_global-master/data/system/attenuation_parameters.xlsx to use
-%   parameters for specific regions; otherwise the function
-%   eq_global_attenuation will use default values that represent a "global
-%   average attenuation function"
+%   dep: depth [km] of epicenter
+%   correction,a1,a2,a3,a4: parameters defining the attenuation function. See
+%       eq_global-master/data/system/attenuation_parameters.xlsx to use
+%       parameters for specific regions; otherwise the function
+%       eq_global_attenuation will use default values that represent a "global
+%       average attenuation function"
 % OUTPUTS:
 %   hazard: a struct, the hazard event set, more for tests, since the
 %       hazard set is stored as hazard_set_file, see code
@@ -66,6 +69,7 @@ function hazard=eq_global_hazard_set(eq_data,hazard_set_file,centroids,TEST_epic
 %   simple check for hazard content: hist(full(hazard.intensity(find(hazard.intensity))))
 % MODIFICATION HISTORY:
 % David N. Bresch, david.bresch@gmail.com, 20141012
+% Melanie Bieli, melanie.bieli@bluewin.ch, 20141223, added correction,a1,a2,a3,a4
 %-
 
 hazard=[]; % init
@@ -81,11 +85,12 @@ if ~exist('hazard_set_file','var'),hazard_set_file=[];end
 if ~exist('centroids','var'),centroids=[];end
 if ~exist('TEST_epicenter_preselection','var'),TEST_epicenter_preselection=0;end
 
-% default values for attenuation parameters a1, a2, a3, a4
-if ~exist('a1','var') || isempty(a1), a1 = 1.67;       end
-if ~exist('a2','var') || isempty(a2), a2 = 1.67;       end
-if ~exist('a3','var') || isempty(a3), a3 = 1.3;        end
-if ~exist('a4','var') || isempty(a4), a4 = 0.0026;     end
+if ~exist('dep','var') || isempty(dep), dep = 0;        end
+if ~exist('correction','var') || isempty(correction), correction = 0;  end
+if ~exist('a1','var') || isempty(a1), a1 = 1.7;         end
+if ~exist('a2','var') || isempty(a2), a2 = 1.5;         end
+if ~exist('a3','var') || isempty(a3), a3 = 1.1726;      end
+if ~exist('a4','var') || isempty(a4), a4 = 0.00106;     end
 
 % PARAMETERS
 %
@@ -93,7 +98,7 @@ if ~exist('a4','var') || isempty(a4), a4 = 0.0026;     end
 eq_dir=[fileparts(fileparts(mfilename('fullpath'))) filesep 'data'];
 %
 % since we store the hazard as sparse array, we need an a-priory estimation
-% of it's density
+% of its density
 hazard_arr_density=0.03; % 3% sparse hazard array density (estimated)
 %
 % define the reference year for this hazard set
@@ -164,22 +169,6 @@ if ~isstruct(centroids) % load, if filename given
     load(centroids_file); % contains centrois as a variable
 end
 
-if isfield(centroids,'assets') % an entity instead of centroids passed
-    entity=centroids; % store
-    clear centroids
-end
-
-if exist('entity','var') % the centroids_file contains in fact an entity, not centroids
-    centroids.Latitude =entity.assets.Latitude;
-    centroids.Longitude=entity.assets.Longitude;
-    centroids.centroid_ID=1:length(centroids.Longitude);
-    if isfield(entity.assets,'country_name'),centroids.country_name{1}=entity.assets.country_name;end
-    if isfield(entity.assets,'admin0_name'),centroids.admin0_name{1}=entity.assets.admin0_name;end
-    if isfield(entity.assets,'admin0_ISO3'),centroids.admin0_ISO3{1}=entity.assets.admin0_ISO3;end
-    if isfield(entity.assets,'admin1_name'),centroids.admin1_name{1}=entity.assets.admin1_name;end
-    clear entity
-end
-
 % figure which epicenters can affect the region
 centroids_rect = [min(centroids.Longitude)-EPM max(centroids.Longitude)+EPM min(centroids.Latitude)-EPM max(centroids.Latitude)+EPM];
 centroids_edges_x = [centroids_rect(1), centroids_rect(1), centroids_rect(2), centroids_rect(2)];
@@ -213,7 +202,7 @@ hazard.orig_event_flag(1:hazard.orig_event_count)=1;
 hazard.yyyy             = eq_data.yyyy;
 hazard.mm               = eq_data.mm;
 hazard.dd               = eq_data.dd;
-hazard.datenum          = eq_data.datenum;
+hazard.nodetime_mat     = eq_data.datenum;
 
 % allocate the hazard array (sparse, to manage memory)
 hazard.intensity = spalloc(hazard.event_count,length(hazard.lon),...
@@ -242,8 +231,8 @@ for event_i=1:n_events
         event_i_eff=event_i_eff+1;
         
         hazard.intensity(event_i,:)=eq_global_attenuation(eq_data.glat(event_i),...
-            eq_data.glon(event_i),eq_data.dep(event_i),eq_data.mag(event_i),...
-            centroids, 0, a1,a2,a3,a4);
+            eq_data.glon(event_i),eq_data.mag(event_i),...
+            centroids, 0, eq_data.dep(event_i), correction, a1,a2,a3,a4);
         
         if mod(event_i_eff,mod_step)==0
             mod_step          = 100;
@@ -280,11 +269,8 @@ hazard.filename          = hazard_set_file;
 hazard.comment           = sprintf('EQ hazard event set, generated %s',datestr(now));
 hazard.date              = datestr(now);
 
-fprintf('saving EQ hazard set as %s\n',hazard_set_file); % Octave compatible
-save(hazard_set_file,'hazard','-v7'); % see note on next line:
-% Warning: Variable 'hazard' cannot be saved to a MAT-file whose version is
-% older than 7.3. To save this variable, use the -v7.3 switch. to avoid
-% this warning, the switch is used. david's comment: only shows for large
-% hazard sets, seems to be due to huge size of hazard. Since Octave does
-% not like -v7.3, we use -v7
+fprintf('saving EQ hazard set as %s\n',hazard_set_file);
+save(hazard_set_file,'hazard','-v7.3'); % see note on next line:
+% Warning: Variable 'hazard' cannot be saved to a MAT-file whose version is older than 7.3. To save this variable, use the -v7.3 switch.
+% to avoid this warning, the switch is used. david's comment: only shows for large hazard sets, seems to be due to huge size of hazard
 return

@@ -1,5 +1,6 @@
 function eq_data=eq_signigeq_read(signigeq_file,check_plot)
-% EQ eq data read
+% MODULE:
+% eq_global
 % NAME:
 %   eq_signigeq_read
 % PURPOSE:

@@ -1,5 +1,6 @@
 function eq_data=eq_centennial_read(centennial_file,check_plot)
-% EQ eq data read
+% MODULE:
+% eq_global
 % NAME:
 %   eq_centennial_read
 % PURPOSE:

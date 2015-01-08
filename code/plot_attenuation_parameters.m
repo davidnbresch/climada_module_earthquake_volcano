@@ -1,20 +1,17 @@
 function plot_attenuation_parameters(magnitude, attenuation_file)
-
+% MODULE:
+% eq_global
 % NAME:
 %   plot_attenuation_parameters
-%
 % PURPOSE:
 %   plot the attenuation functions defined by the sets of parameters in
 %   climada_module_eq_global/data/system/attenuation_parameters.xlsx, for a
 %   given magnitude
-%
 % CALLING SEQUENCE:
 %   plot_attenuation_parameters(magnitude, filename)
-%
 % EXAMPLE:
 %   plot_attenuation_parameters(8)
 %   plot_attenuation_parameters
-%
 % INPUT:
 %   magnitude: Richter magnitude at epicenter. If empty, 8 is used as
 %   default value
@@ -22,11 +19,9 @@ function plot_attenuation_parameters(magnitude, attenuation_file)
 %   parameters. 
 %   If empty, the code tries a default name, if it does not exist, it
 %   prompts the user to locate the file
-%
 % OUTPUTS:
 %   A plot showing the attenuation of intensity with distance for each set
 %   of parameters and for the magnitude specified in the input
-%
 % COMMENT:
 %   The parameters a1, a2, a3, and a4 describe an attenuantion of the type
 %   MMI(dist) = a1 + a2 * mag - a3 * log(dist) - a4 * dist, where

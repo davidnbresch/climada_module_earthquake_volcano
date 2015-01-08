@@ -1,5 +1,6 @@
 function eq_data=eq_global_probabilistic(eq_data_in,ens_size,check_plot)
-% EQ eq data probabilistic
+% MODULE:
+% eq_global
 % NAME:
 %   eq_global_probabilistic
 % PURPOSE:
@@ -118,7 +119,8 @@ eq_data_in.mag=eq_data_in.mag+min_mag; % just for safety
 eq_data.mag=eq_data.mag+min_mag;
 
 try
-    epicenters_file_prob_mat=strrep(eq_data_in.filename,'.txt','_prob.mat');
+    [fP,fN]=fileparts(eq_data_in.filename);
+    epicenters_file_prob_mat=[fP filesep fN '_prob.mat'];
     fprintf('probabilistic set stored as %s\n',epicenters_file_prob_mat);
     save(epicenters_file_prob_mat,'eq_data');
 catch
