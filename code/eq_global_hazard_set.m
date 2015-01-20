@@ -70,6 +70,7 @@ function hazard=eq_global_hazard_set(eq_data,hazard_set_file,centroids,TEST_epic
 % MODIFICATION HISTORY:
 % David N. Bresch, david.bresch@gmail.com, 20141012
 % Melanie Bieli, melanie.bieli@bluewin.ch, 20141223, added correction,a1,a2,a3,a4
+% Melanie Bieli, melanie.bieli@bluewin.ch, 20150120, hazard_arr_density=0.01
 %-
 
 hazard=[]; % init
@@ -99,7 +100,8 @@ eq_dir=[fileparts(fileparts(mfilename('fullpath'))) filesep 'data'];
 %
 % since we store the hazard as sparse array, we need an a-priory estimation
 % of its density
-hazard_arr_density=0.03; % 3% sparse hazard array density (estimated)
+%hazard_arr_density=0.03; % 3% sparse hazard array density (estimated)
+hazard_arr_density=0.01; % 3% sparse hazard array density (estimated)
 %
 % define the reference year for this hazard set
 hazard_reference_year = climada_global.present_reference_year; % does not really matter for EQ
@@ -205,6 +207,8 @@ hazard.dd               = eq_data.dd;
 hazard.nodetime_mat     = eq_data.datenum;
 
 % allocate the hazard array (sparse, to manage memory)
+fprintf('%s: spalloc(%i,%i,%i)\n',mfilename,hazard.event_count,length(hazard.lon),...
+    ceil(hazard.event_count*length(hazard.lon)*hazard_arr_density));
 hazard.intensity = spalloc(hazard.event_count,length(hazard.lon),...
     ceil(hazard.event_count*length(hazard.lon)*hazard_arr_density));
 
