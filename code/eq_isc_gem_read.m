@@ -1,4 +1,5 @@
 function eq_data=eq_isc_gem_read(isc_gem_file,check_plot)
+% read ISC-GEM earthquake catalogue
 % EQ eq data read
 % NAME:
 %   isc_gem_read

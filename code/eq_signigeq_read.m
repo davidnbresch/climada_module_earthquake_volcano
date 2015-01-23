@@ -1,4 +1,5 @@
 function eq_data=eq_signigeq_read(signigeq_file,check_plot)
+% Read Significant Earthquake Database
 % MODULE:
 % eq_global
 % NAME:

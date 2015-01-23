@@ -1,4 +1,6 @@
-function intensity_at_centroids = eq_global_attenuation(glat,glon,mag,centroids,check_plot,dep,correction,a1,a2,a3,a4)
+function intensity_at_centroids = eq_global_attenuation(glat,glon,mag,centroids,check_plot,dep,correction,a1,a2,a3,a4,b)
+% Calculate the attenuation of an earthquake's intensity with
+% increasing distance from the epicenter
 % MODULE:
 % eq_global
 % NAME:
@@ -36,8 +38,8 @@ function intensity_at_centroids = eq_global_attenuation(glat,glon,mag,centroids,
 %       centroids.Latitude: the latitude of the centroids
 %       centroids.Longitude: the longitude of the centroids
 % OPTIONAL INPUT PARAMETERS:
-%   correction,a1,a2,a3,a4: parameters defining the attenuation function. See
-%   eq_global-master/data/system/attenuation_parameters.xlsx to use
+%   correction,a1,a2,a3,a4,b: parameters defining the attenuation function. 
+%   See eq_global-master/data/system/attenuation_parameters.xlsx to use
 %   parameters for specific regions; otherwise default values representing
 %   a "global average attenuation function" will be used
 %   check_plot: =1, if a check plot shall be drawn (default=0)
@@ -104,7 +106,7 @@ for centroid_ii=1:length(eff_centroids) %
     % ********************************************************************
     % calling the function MMI_attenuation_calc to calculate the intensity at the
     % centroids
-    intensity_at_centroids(centroid_i) = MMI_attenuation_calc(mag, R, dep, correction, a1, a2, a3, a4);    
+    intensity_at_centroids(centroid_i) = MMI_attenuation_calc(mag, R, dep, correction, a1, a2, a3, a4, b);    
     % ********************************************************************
     
 end % centroid_ii

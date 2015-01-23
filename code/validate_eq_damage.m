@@ -1,11 +1,12 @@
 function eq_data_calculated_damage = validate_eq_damage(eq_data, check_plot)
+% Calculate damages of single earthquakes (and compare to historic data)
 % MODULE:
 % eq_global
 % NAME:
 %   validate_eq_damage
 % PURPOSE:
 %   Calculate the damages (in USD) of individual events, e.g., to compare
-%   them to historic damage data for validation purposes
+%   them to historic damage data for validation purposes 
 % CALLING SEQUENCE:
 %   eq_data_calculated_damage = validate_eq_damage(eq_data)
 % EXAMPLE:
@@ -29,7 +30,9 @@ function eq_data_calculated_damage = validate_eq_damage(eq_data, check_plot)
 %
 %   Alternatively, eq_data can also be a filename of a saved eq_data
 %   structure, or the filename of an excel file to read the earthquake data
-%   from. In the latter case, the excel sheet needs to have the following
+%   from (e.g., the file signieq_table_for_validation.xls in 
+%   eq_global/data/epicenters). 
+%   In the latter case, the excel sheet needs to have the following
 %   fields:
 %       YEAR        : year when the earthquake happened
 %       MONTH       : month
@@ -61,15 +64,22 @@ function eq_data_calculated_damage = validate_eq_damage(eq_data, check_plot)
 % be pretty time consuming for large countries. If the country-specific 
 % entities and centroids are already available as .mat files, the code will
 % skip that step and load them directly from those .mat files instead. In
-% order for this to work, the entity and centroid files need to be placed
-% in the /data/epicenters directory of the eq module, and named in the
-% following way:
-% centroids_countryname.mat (e.g. centroids_Italy.mat)
-% entity_countryname.mat (e.g. entity_Italy.mat)
+% order for this to work, the entity files need to be placed
+% in the /data/entities directory of the climada-master module, and named 
+% in the following way:
+% ISO3_countryname_centroids.mat (e.g. ITA_Italy_centroids.mat),
+% and the centroids need to be placed in the /data/system directory of the
+% climada-master module, and named in the following way:
+% ISO3_countryname_entity.mat (e.g. ITA_Italy_entity.mat)
 % 
+% CAUTIONARY NOTE:
+% This code was only produced for testing purposes and has not been
+% optimized for general applications - it might therefore need some
+% adjustment to work properly in different environments.
 %
 % MODIFICATION HISTORY:
 % Melanie Bieli, melanie.bieli@bluewin.ch, 20141212, initial
+% Melanie Bieli, melanie.bieli@bluewin.ch, 20150123, minor changes
 %-
 
 % init global variables
@@ -83,8 +93,10 @@ eq_data_calculated_damage = struct([]);
 if ~exist('eq_data','var'),eq_data=[];end
 if ~exist('check_plot','var'),check_plot=0;end
 
-% set directory to look for eq_data
-eq_data_dir = [fileparts(fileparts(mfilename('fullpath'))) filesep 'data' filesep 'epicenters'];
+% set directories
+entities_data_dir = [climada_global.data_dir filesep 'entities'];
+centroids_data_dir = [climada_global.data_dir filesep 'system'];
+eq_data_dir=[fileparts(fileparts(mfilename('fullpath'))) filesep 'data' filesep 'epicenters'];
 
 % prompt for eq_data if not given {'*.mat';'*.xls*'}
 if isempty(eq_data) % local GUI
@@ -147,10 +159,11 @@ for i=start_index:end_index
     % check whether centroids and entity of the respective countries already 
     % exist in eq_data_dir, and if not, generate them using 
     % climada_create_GDP_entity
-    centroids_string = sprintf('centroids_%s.mat',char(eq_data.country(i)));
-    centroids_file = [eq_data_dir filesep centroids_string];
-    entity_string = sprintf('entity_%s.mat',char(eq_data.country(i)));
-    entity_file = [eq_data_dir filesep entity_string];
+    [~,country_ISO3] = climada_country_name(eq_data.country(i)); % check name and ISO3
+    centroids_string = sprintf('%s_%s_centroids.mat',country_ISO3,char(eq_data.country(i)));
+    centroids_file = [centroids_data_dir filesep centroids_string];
+    entity_string = sprintf('%s_%s_entity.mat',country_ISO3,char(eq_data.country(i)));
+    entity_file = [entities_data_dir filesep entity_string];
     if or(~exist(centroids_file,'file'),~exist(entity_file,'file'));
         % centroids and entity are not available, hence calculate them
         [centroids, entity, ~] = climada_create_GDP_entity(char(eq_data.country(i)), [], 0, 1);
@@ -165,7 +178,7 @@ for i=start_index:end_index
         
         save(centroids_file,'centroids');
         save(entity_file,'entity');
-        savefile = [climada_global.data_dir filesep 'results' filesep 'calculated_damage_20141220.mat'];
+        savefile = [climada_global.data_dir filesep 'results' filesep 'calculated_damage.mat'];
         save(savefile,'calculated_damage'); 
         
         fprintf('Finished earthquake %d\n',i);
@@ -183,7 +196,7 @@ for i=start_index:end_index
         EDS = climada_EDS_calc(entity,single_hazard);
         calculated_damage(i-(start_index-1)) = EDS.damage(1);
         
-        savefile = [climada_global.data_dir filesep 'results' filesep 'calculated_damage_20141220.mat'];
+        savefile = [climada_global.data_dir filesep 'results' filesep 'calculated_damage.mat'];
         save(savefile,'calculated_damage'); 
         
         fprintf('Finished earthquake %d\n',i);

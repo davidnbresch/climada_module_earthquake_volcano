@@ -1,4 +1,5 @@
 function eq_data=eq_global_probabilistic(eq_data_in,ens_size,check_plot)
+% generate probabilistic hazard set
 % MODULE:
 % eq_global
 % NAME:

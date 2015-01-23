@@ -1,4 +1,5 @@
 function eq_data=eq_centennial_read(centennial_file,check_plot)
+% Read Centennial Earthquake Database
 % MODULE:
 % eq_global
 % NAME:

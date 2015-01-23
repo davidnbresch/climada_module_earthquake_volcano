@@ -1,4 +1,5 @@
 function single_eq_event = climada_get_single_event(eq_data, event_i)
+% get single earthquake event
 % MODULE:
 % eq_global
 % NAME:
@@ -27,7 +28,10 @@ function single_eq_event = climada_get_single_event(eq_data, event_i)
 % OUTPUT:
 %   single_event: a structure with the same fields as eq_data, but 
 %   containing only the data for the (event_i)th hazard in eq_data
-%
+% CAUTIONARY NOTE: 
+%   This code has only been written for testing purposes
+%   (namely as a helper function for validate_eq_damage) and might need 
+%   some improvements for general use
 % MODIFICATION HISTORY:
 % Melanie Bieli, melanie.bieli@bluewin.ch, 20141213, initial
 %-
@@ -56,7 +60,7 @@ end
 
 % set some of the fields manually 
 % TO DO: This could be solved more elegantly (i.e. in a way that needs no 
-% manual adjustment, but for the time being I leave it at that
+% manual adjustment, but for the time being I leave it at that)
 single_eq_event.n_epicenters_orig = 1;
 single_eq_event.country = char(eq_data.country{event_i});
 single_eq_event.filename = eq_data.filename;

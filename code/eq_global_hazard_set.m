@@ -1,4 +1,5 @@
-function hazard=eq_global_hazard_set(eq_data,hazard_set_file,centroids,TEST_epicenter_preselection, dep, correction,a1,a2,a3,a4)
+function hazard=eq_global_hazard_set(eq_data,hazard_set_file,centroids,TEST_epicenter_preselection,correction,a1,a2,a3,a4,b)
+% Create earthquake hazard set
 % MODULE
 % eq_global
 % NAME:
@@ -35,8 +36,7 @@ function hazard=eq_global_hazard_set(eq_data,hazard_set_file,centroids,TEST_epic
 %   TEST_epicenter_preselection: whether we show the epicenters selected
 %       for processing (=1) or not (=0, default)
 %       if =2, STOP after plot of preselection (to check preselection only)
-%   dep: depth [km] of epicenter
-%   correction,a1,a2,a3,a4: parameters defining the attenuation function. See
+%   correction,a1,a2,a3,a4,b: parameters defining the attenuation function. See
 %       eq_global-master/data/system/attenuation_parameters.xlsx to use
 %       parameters for specific regions; otherwise the function
 %       eq_global_attenuation will use default values that represent a "global
@@ -86,12 +86,12 @@ if ~exist('hazard_set_file','var'),hazard_set_file=[];end
 if ~exist('centroids','var'),centroids=[];end
 if ~exist('TEST_epicenter_preselection','var'),TEST_epicenter_preselection=0;end
 
-if ~exist('dep','var') || isempty(dep), dep = 0;        end
 if ~exist('correction','var') || isempty(correction), correction = 0;  end
 if ~exist('a1','var') || isempty(a1), a1 = 1.7;         end
 if ~exist('a2','var') || isempty(a2), a2 = 1.5;         end
 if ~exist('a3','var') || isempty(a3), a3 = 1.1726;      end
 if ~exist('a4','var') || isempty(a4), a4 = 0.00106;     end
+if ~exist('b','var')  || isempty(b),  b = 0;            end
 
 % PARAMETERS
 %
@@ -101,7 +101,7 @@ eq_dir=[fileparts(fileparts(mfilename('fullpath'))) filesep 'data'];
 % since we store the hazard as sparse array, we need an a-priory estimation
 % of its density
 %hazard_arr_density=0.03; % 3% sparse hazard array density (estimated)
-hazard_arr_density=0.01; % 3% sparse hazard array density (estimated)
+hazard_arr_density=0.01; % 1% sparse hazard array density (estimated)
 %
 % define the reference year for this hazard set
 hazard_reference_year = climada_global.present_reference_year; % does not really matter for EQ
@@ -236,7 +236,7 @@ for event_i=1:n_events
         
         hazard.intensity(event_i,:)=eq_global_attenuation(eq_data.glat(event_i),...
             eq_data.glon(event_i),eq_data.mag(event_i),...
-            centroids, 0, eq_data.dep(event_i), correction, a1,a2,a3,a4);
+            centroids, 0, eq_data.dep(event_i), correction, a1,a2,a3,a4,b);
         
         if mod(event_i_eff,mod_step)==0
             mod_step          = 100;
