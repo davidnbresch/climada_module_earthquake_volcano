@@ -1,4 +1,4 @@
-function eq_data=eq_isc_gem_read(isc_gem_file,check_plot)
+function [eq_data,isc_gem_file_mat]=eq_isc_gem_read(isc_gem_file,check_plot)
 % read ISC-GEM earthquake catalogue
 % EQ eq data read
 % NAME:
@@ -17,7 +17,7 @@ function eq_data=eq_isc_gem_read(isc_gem_file,check_plot)
 %
 %   next step: see eq_global_probabilistic
 % CALLING SEQUENCE:
-%   eq_data=eq_isc_gem_read(isc_gem_file,check_plot)
+%   [eq_data,isc_gem_file_mat]=eq_isc_gem_read(isc_gem_file,check_plot)
 % EXAMPLE:
 %   eq_data=eq_isc_gem_read('',1) % read std file, show epicenters plot
 % INPUTS:
@@ -38,8 +38,9 @@ function eq_data=eq_isc_gem_read(isc_gem_file,check_plot)
 %       glon(line_i): geographic longitude
 %       dep(line_i) : focal depth
 %       mag(line_i) : magnitude (moment magnitude, mw)
-%   also stored as .mat file. Please delete the .mat file manually in order
-%   to re-read from the original .csv file 
+%       > also stored as .mat file. Please delete the .mat file manually in order
+%       to re-read from the original .csv file 
+%   isc_gem_file_mat: the name of the .mat file eq_data is stored to
 % MODIFICATION HISTORY:
 % Melanie Bieli, melanie.bieli@bluewin.ch, 20141117
 % David N. Bresch, david.bresch@gmail.com, 20141210, date conversion revised
@@ -47,6 +48,7 @@ function eq_data=eq_isc_gem_read(isc_gem_file,check_plot)
 %-
 
 eq_data=[]; % initialize output
+isc_gem_file_mat=''; % initialize output
 
 % global climada_global
 if ~climada_init_vars,return;end % init/import global variables
