@@ -147,11 +147,11 @@ if isempty(centroids) % local GUI
         for lon_i=-130:1:-110
             for lat_i=25:1:45
                 ii=ii+1;
-                centroids.Longitude(ii)=lon_i;
-                centroids.Latitude(ii)=lat_i;
+                centroids.lon(ii)=lon_i;
+                centroids.lat(ii)=lat_i;
             end
         end
-        centroids.centroid_ID=1:length(centroids.Longitude);
+        centroids.centroid_ID=1:length(centroids.lon);
     else
         centroids_file=fullfile(pathname,filename);
         [~,~,fE]=fileparts(centroids_file);
@@ -172,7 +172,7 @@ if ~isstruct(centroids) % load, if filename given
 end
 
 % figure which epicenters can affect the region
-centroids_rect = [min(centroids.Longitude)-EPM max(centroids.Longitude)+EPM min(centroids.Latitude)-EPM max(centroids.Latitude)+EPM];
+centroids_rect = [min(centroids.lon)-EPM max(centroids.lon)+EPM min(centroids.lat)-EPM max(centroids.lat)+EPM];
 centroids_edges_x = [centroids_rect(1), centroids_rect(1), centroids_rect(2), centroids_rect(2)];
 centroids_edges_y = [centroids_rect(3), centroids_rect(4), centroids_rect(4), centroids_rect(3)];
 in_centroids_poly = inpolygon(eq_data.glon,eq_data.glat,centroids_edges_x,centroids_edges_y);
@@ -192,8 +192,8 @@ orig_years = max_year - min_year+1;
 
 % fill the hazard structure
 hazard.reference_year   = hazard_reference_year;
-hazard.lon              = centroids.Longitude;
-hazard.lat              = centroids.Latitude;
+hazard.lon              = centroids.lon;
+hazard.lat              = centroids.lat;
 hazard.centroid_ID      = centroids.centroid_ID;
 hazard.event_count      = length(eq_data.mag);
 hazard.event_ID         = 1:hazard.event_count;

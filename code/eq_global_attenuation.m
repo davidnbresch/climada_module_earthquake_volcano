@@ -35,8 +35,8 @@ function intensity_at_centroids = eq_global_attenuation(glat,glon,mag,centroids,
 %   dep: depth [km] of epicenter
 %   mag: magnitude (Richter) of epicenter
 %   centroids: a structure with the centroids information
-%       centroids.Latitude: the latitude of the centroids
-%       centroids.Longitude: the longitude of the centroids
+%       centroids.lat: the latitude of the centroids
+%       centroids.lon: the longitude of the centroids
 % OPTIONAL INPUT PARAMETERS:
 %   correction,a1,a2,a3,a4,b: parameters defining the attenuation function. 
 %   See eq_global-master/data/system/attenuation_parameters.xlsx to use
@@ -73,7 +73,7 @@ if ~exist('mag','var'),return; end
 if ~exist('centroids','var'),return; end
 if ~exist('check_plot','var'), check_plot= 0; end
 
-intensity_at_centroids = centroids.Longitude*0; % init output
+intensity_at_centroids = centroids.lon*0; % init output
 
 % PARAMETERS
 %
@@ -87,7 +87,7 @@ max_centroids_dist = 150; % max distance to epicenter we calculate intensity (in
 R_mean_Earth = 6371;    % the Earth's mean radius (in km)
 glat_rad = degtorad(glat);
 glon_rad = degtorad(glon);
-raddist = acos(sin(glat_rad)*sin(degtorad(centroids.Latitude)) + cos(glat_rad)*cos(degtorad(centroids.Latitude)).*cos(degtorad(centroids.Longitude)-glon_rad));
+raddist = acos(sin(glat_rad)*sin(degtorad(centroids.lat)) + cos(glat_rad)*cos(degtorad(centroids.lat)).*cos(degtorad(centroids.lon)-glon_rad));
 if raddist < 0 
    raddist = raddist + pi;
 end
@@ -125,11 +125,11 @@ if check_plot
     hold on
     climada_plot_world_borders(0.7)
     
-    plot(centroids.Longitude, centroids.Latitude, '+r','MarkerSize',0.8,'linewidth',0.1)
+    plot(centroids.lon, centroids.lat, '+r','MarkerSize',0.8,'linewidth',0.1)
     
     axis equal
-    axis([min(centroids.Longitude) max(centroids.Longitude) ...
-        min(centroids.Latitude)  max(centroids.Latitude)]);
+    axis([min(centroids.lon) max(centroids.lon) ...
+        min(centroids.lat)  max(centroids.lat)]);
     caxis([2 gridded_max_round])
     colorbar
 end
