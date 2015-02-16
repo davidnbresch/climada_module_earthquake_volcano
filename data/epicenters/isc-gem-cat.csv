@@ -26,13 +26,13 @@
 #
 #
 # The ISC-GEM Global Instrumental Earthquake Catalogue contains:
-# - earthquake origin date and time;
-# - epicentre (lat,lon);
+# - earthquake origin date and time
+# - epicentre (lat,lon)
 # - error ellipse parameters (smajax, sminax, strike), epicentre quality,
-# (q:A(highest)/B/C);
-# - depth, depth uncertainty (unc), depth quality (q:A(highest)/B/C);
+# (q:A(highest)/B/C)
+# - depth, depth uncertainty (unc), depth quality (q:A(highest)/B/C)
 # - Mw, Mw uncertainty (unc), quality (q:A(highest)/B/C), source(s:p-proxy,
-# d-direct computation);
+# d-direct computation)
 # - where available: scalar moment (mo), factor (fac) , mo author (mo_auth)
 # and six moment tensor components (mpp, mpr, mrr, mrt, mtp, mtt).
 #
@@ -18865,3 +18865,12 @@
  2009-12-30 18:48:59.97 ,   32.474 , -115.228 ,   2.7 ,   2.7 , 118.8 , A ,   15.0 ,   3.7 , A , 5.88 , 0.10 , A , d ,  0.80 , 18 ,    gcmt  ,  0.75 ,  0.05 , -0.09 ,  0.10 ,  0.35 , -0.67 ,   14211649
  2009-12-31 09:23:24.84 ,  -59.704 , -150.719 ,  12.2 ,   9.1 ,  16.0 , A ,   10.0 ,  25.0 , C , 5.99 , 0.10 , A , d ,  1.17 , 18 ,    gcmt  , -1.00 ,  0.17 , -0.04 ,  0.00 ,  0.55 ,  1.04 ,   14212495
  2009-12-31 09:29:44.70 ,  -59.398 , -150.978 ,  21.4 ,  15.1 ,  12.6 , A ,   10.0 ,  25.0 , C , 5.62 , 0.10 , A , d ,  3.35 , 17 ,    gcmt  , -2.75 ,  1.17 , -0.19 , -0.45 ,  1.26 ,  2.94 ,   14219400
+1356-10-18 21:00:00.00 ,    47.47,      7.6 ,                   ,           ,           ,    ,  10 ,               ,    ,   6.6,            ,    ,     ,          ,       ,               ,          ,           ,           ,          ,              ,        ,           
+1811-06-07 13:45:00.00,     46.85,    9.53 ,                   ,           ,           ,    ,  5,                  ,   ,    3.9,           ,      ,   ,           ,        ,              ,         ,           ,             ,         ,              ,        ,     
+1855-07-26 13:20:00.00,     46.23,    7.82,                    ,           ,           ,    ,  7,                  ,    ,   5.3,           ,      ,   ,           ,        ,              ,          ,           ,           ,          ,              ,        ,
+1917-06-20 23:09:00.00,     47.61,     9.1,                     ,           ,            ,    ,  4,                  ,   ,   4.1,           ,      ,    ,          ,        ,               ,         ,           ,            ,         ,               ,       ,
+1946-05-30 00:35:00.00,      46.3,      7.52,                   ,           ,            ,    , 3,                   ,   ,   5.0,           ,      ,   ,            ,       ,               ,         ,           ,            ,         ,               ,       ,
+1961-08-09 13:00:00.00,     46.81,    10.35,                 ,            ,            ,   , 5,                    ,   ,  4.9,            ,     ,   ,            ,        ,              ,         ,           ,            ,          ,              ,        ,
+1964-02-17 12:20:00.00,     46.88,      8.27,               ,            ,              ,   , 5,                    ,   ,  4.8,            ,     ,   ,            ,        ,              ,         ,           ,            ,          ,              ,        ,
+1971-09-29 07:18:52.00,     47.0,          9.0,                 ,            ,            ,   , 1,                    ,   ,  4.9,            ,     ,   ,            ,        ,              ,         ,           ,            ,          ,              ,        ,
+1992-05-08 06:44:40.00,     47.145,    9.518,              ,            ,            ,   , 2,                    ,   ,  4.34,          ,     ,   ,            ,        ,              ,         ,           ,            ,          ,              ,        ,
