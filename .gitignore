@@ -14,3 +14,7 @@ data/epicenters/isc-gem-cat.zip
 data/epicenters/isc-gem-cat.csv
 
 data/epicenters/isc-gem-cat_prob.mat
+
+data/volcanoes/NGDC_SignificantVolcanicEvents.mat
+
+data/volcanoes/GVP_Volcano_List_OLD.xls
