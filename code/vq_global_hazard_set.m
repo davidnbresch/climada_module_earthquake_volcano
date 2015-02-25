@@ -13,6 +13,7 @@ function hazard=vq_global_hazard_set(vq_data,hazard_set_file,centroids,TEST_volc
 %   hazard=vq_global_hazard_set(vq_data,hazard_set_file,centroids)
 % EXAMPLE:
 %   hazard=vq_global_hazard_set(vq_volcano_list_read)
+%   hazard=vq_global_hazard_set(vq_volcano_list_read,'',[],1) % TEST
 % INPUTS:
 % OPTIONAL INPUT PARAMETERS:
 %   vq_data: a structure with volcano information, see vq_volcano_list_read
@@ -32,7 +33,7 @@ function hazard=vq_global_hazard_set(vq_data,hazard_set_file,centroids,TEST_volc
 %       NOTE: if you then select Cancel, a regular default grid is used
 %       (TEST mode), see hard-wired definition in code (a rectangular area in California)
 %   TEST_volcano_preselection: if =1, check and show centroids and volcano
-%       positions, Default=0, no check
+%       positions, if =2 STOP after check, Default=0, no check
 % OUTPUTS:
 %   hazard: a struct, the hazard event set, more for tests, since the
 %       hazard set is stored as hazard_set_file, see code
@@ -126,8 +127,9 @@ if isempty(centroids) % local GUI
         % TEST centroids
         fprintf('WARNING: Special mode, TEST centroids grid (Naples) created in %s\n',mfilename);
         ii=0;
-        for lon_i=13:.025:16
-            for lat_i=38:.025:42
+        dlonlat=0.01; % crude tests: dlonlat=0.25;
+        for lon_i=13:dlonlat:15
+            for lat_i=39:dlonlat:41
                 ii=ii+1;
                 centroids.lon(ii)=lon_i;
                 centroids.lat(ii)=lat_i;
@@ -158,12 +160,26 @@ centroids_rect = [min(centroids.lon)-EPM max(centroids.lon)+EPM min(centroids.la
 centroids_edges_x = [centroids_rect(1), centroids_rect(1), centroids_rect(2), centroids_rect(2)];
 centroids_edges_y = [centroids_rect(3), centroids_rect(4), centroids_rect(4), centroids_rect(3)];
 in_centroids_poly = inpolygon(vq_data.lon,vq_data.lat,centroids_edges_x,centroids_edges_y);
+
+% skip small events (for TESTs)
+in_centroids_poly(vq_data.Cloud_height_km<10)=0;
+
 if TEST_volcano_preselection>0
     climada_plot_world_borders; hold on
     plot(vq_data.lon,vq_data.lat,'.b')
     plot(vq_data.lon(in_centroids_poly),vq_data.lat(in_centroids_poly),'og')
     plot(vq_data.lon(in_centroids_poly),vq_data.lat(in_centroids_poly),'xg')
     plot(centroids.lon,centroids.lat,'.r')
+    axis equal
+    fprintf('%i (of %i) volcanoes in range\n',sum(in_centroids_poly),length(vq_data.lon));
+    in_centroids_pos=find(in_centroids_poly);
+    for i=1:length(in_centroids_pos)
+        fprintf('%s: %f (damage %f, cloud height %f km)\n',...
+            char(vq_data.Name(in_centroids_pos(i))),...
+            vq_data.VEI(in_centroids_pos(i)),...
+            vq_data.damage(in_centroids_pos(i)),...
+            vq_data.Cloud_height_km(in_centroids_pos(i)));
+    end %i
     if TEST_volcano_preselection>1
         fprintf('STOP after epicenter preselection\n');
         return
@@ -192,9 +208,9 @@ hazard.orig_event_count = vq_data.n_volcanoes_orig;
 hazard.orig_event_flag  = zeros(1,hazard.event_count);
 hazard.orig_event_flag(1:hazard.orig_event_count)=1;
 hazard.yyyy             = vq_data.Year;
-% hazard.mm               = vq_data.mm;
-% hazard.dd               = vq_data.dd;
-hazard.nodetime_mat     = vq_data.datenum;
+hazard.datenum          = vq_data.datenum;
+hazard.vq_data_filename = vq_data.filename;
+
 
 % allocate the hazard array (sparse, to manage memory)
 % fprintf('%s: spalloc(%i,%i,%i)\n',mfilename,hazard.event_count,length(hazard.lon),...
@@ -206,11 +222,11 @@ t0       = clock;
 n_events = hazard.event_count;
 n_events_eff=sum(in_centroids_poly);
 
-msgstr   = sprintf('processing %i (of globally %i) epicenters',n_events_eff,n_events);
+msgstr   = sprintf('processing %i (of globally %i) volcanoes',n_events_eff,n_events);
 if climada_global.waitbar
-    fprintf('%s (updating waitbar with estimation of time remaining every 100th epicenter)\n',msgstr);
+    fprintf('%s (updating waitbar with estimation of time remaining every 100th volcano)\n',msgstr);
     h        = waitbar(0,msgstr);
-    set(h,'Name','Hazard EQ: shaking intensity (MMI)');
+    set(h,'Name','Hazard VQ: thephra/ash thickness (cm)');
     mod_step = 10; % first time estimate after 10 events, then every 100
 else
     fprintf('%s (waitbar suppressed)\n',msgstr);
@@ -237,14 +253,14 @@ for event_i=1:n_events
         else
             H=14; % default, 14 km
         end
+        H=25;
         rho=1100; % density of the falling material (kgm-3, indicative value 1100),
         alpha_param=2.535-0.051*H; % the rate at which the deposit thickness decays with distance
         Htropopause=15.5; % tropopause height in km
-        tau=24; % duration of the high-intensity phase of the eruption in hours
-        
-        U=100; % wind velocity U (in km/h, indicative 50-100 km/h most often), duration of the high-intensity phase of the eruption ? (in hours, e.g. Pinatubo 1-5h) and D (in km2/h) as follows (to distinguish between event that do and do not penetrate the stratosphere):
-        phi=pi/4; % angle (in radian, North is 0)
-        
+        tau=48; % duration of the high-intensity phase of the eruption in hours
+        U_vel=200; % wind velocity U (in km/h, indicative 50-100 km/h most often), duration of the high-intensity phase of the eruption ? (in hours, e.g. Pinatubo 1-5h) and D (in km2/h) as follows (to distinguish between event that do and do not penetrate the stratosphere):
+        U_phi=-pi; % direction of wind in radian, counterclockwise from (dx=1,dy=0), i.e. from direction East
+             
         if H<Htropopause
             D=-4.189*H+114.407;
         else % above)
@@ -253,13 +269,24 @@ for event_i=1:n_events
         
         for centroid_i=1:length(centroids.lon)
             
-            % distance to eruption center im km
-            r=sqrt(((centroids.lon(centroid_i)-vq_data.lon(event_i))*cos_vq_data_lat(event_i))^2+...
-                (centroids.lat(centroid_i)-vq_data.lat(event_i))^2)*111.12; % km           
+            % variable parameters are distance r and phi, angle between the
+            % wind direction and the vector from the ash emission center to the
+            % centroid.
             
+            % distance to eruption center im km
+            dx=(centroids.lon(centroid_i)-vq_data.lon(event_i))*cos_vq_data_lat(event_i);
+            dy=centroids.lat(centroid_i)-vq_data.lat(event_i);
+            
+            r=sqrt(dx^2+dy^2)*111.12; % km
+            
+            phi0=atan2(dy,dx); % four quadrant arctangent in radion (-pi<=atan2(Y,X)<= pi, in degree: ./pi*180)
+            % measured counterclockwise from dx=1,dy0, i.e. atan2(0,1)=0, atan2(1,1)=pi/4, atan2(1,0)=pi/2 
+            
+            phi=phi0-U_phi;
+ 
             T=14.28*H^4*tau^(alpha_param/2) / ...
                 ( (2*D)^(1-alpha_param/2)*rho ) * ...
-                exp(-U/(2*D)*r*(1-cos(phi)))*r^-alpha_param;
+                exp(-U_vel/(2*D)*r*(1-cos(phi)))*r^-alpha_param;
             
             hazard.intensity(event_i,centroid_i)=T;
             

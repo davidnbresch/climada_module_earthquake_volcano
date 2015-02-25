@@ -204,7 +204,7 @@ hazard.orig_event_flag(1:hazard.orig_event_count)=1;
 hazard.yyyy             = eq_data.yyyy;
 hazard.mm               = eq_data.mm;
 hazard.dd               = eq_data.dd;
-hazard.nodetime_mat     = eq_data.datenum;
+hazard.datenum          = eq_data.datenum;
 hazard.units            = 'MMI';
 
 % allocate the hazard array (sparse, to manage memory)

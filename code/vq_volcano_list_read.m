@@ -30,6 +30,8 @@ function [vq_data,volcano_list_file_mat]=vq_volcano_list_read(volcano_list_file,
 %       volacano_list with volcano information
 %       if empty, the code tries a default name, if it does not exist, it
 %       prompts the user to locate the file
+%       Two short options are possible, too: 'GVP' or 'NGDC', see above
+%       Default is 'NGDC', as this list contains more parameters
 %   check_plot: show a check plot (=1), or not (=0, default)
 % OUTPUTS:
 %   vq_data, a structure with either (for
@@ -66,7 +68,7 @@ function [vq_data,volcano_list_file_mat]=vq_volcano_list_read(volcano_list_file,
 %-
 
 vq_data=[]; % initialize output
-vq_data_file_mat=''; % initialize output
+volcano_list_file_mat=''; % initialize output
 
 % global climada_global
 if ~climada_init_vars,return;end % init/import global variables
@@ -79,12 +81,20 @@ if ~exist('check_plot','var'),check_plot=0;end
 % prompt for file open dialogs
 eq_dir=[fileparts(fileparts(mfilename('fullpath'))) filesep 'data'];
 %
-% set default value for isc_gem_file if not given
-%volcano_list_file_default=[eq_dir filesep 'volcanoes' filesep 'GVP_Volcano_List.xls'];
-volcano_list_file_default=[eq_dir filesep 'volcanoes' filesep 'NGDC_SignificantVolcanicEvents.xls'];
-if isempty(volcano_list_file),volcano_list_file=volcano_list_file_default;end
+% define default value(s) for volcano list file if not given
+GVP_volcano_list_file_default =[eq_dir filesep 'volcanoes' filesep 'GVP_Volcano_List.xls'];
+NGDC_volcano_list_file_default=[eq_dir filesep 'volcanoes' filesep 'NGDC_SignificantVolcanicEvents.xls'];
+
+if isempty(volcano_list_file),volcano_list_file='NGDC';end
+
+if strcmp(volcano_list_file,'GVP')
+    volcano_list_file=GVP_volcano_list_file_default;
+elseif strcmp(volcano_list_file,'NGDC')
+    volcano_list_file=NGDC_volcano_list_file_default;
+end
 
 if ~exist(volcano_list_file,'file')
+    volcano_list_file=NGDC_volcano_list_file_default;
     [filename, pathname] = uigetfile(volcano_list_file,'Choose volcano database:');
     if isequal(filename,0) || isequal(pathname,0)
         fprintf('No volcano database selected, consider downloading eq_global module again\n');
