@@ -78,7 +78,6 @@ if ~exist('check_plot','var'),check_plot=0;end
 
 % PARAMETERS
 %
-% prompt for file open dialogs
 eq_dir=[fileparts(fileparts(mfilename('fullpath'))) filesep 'data'];
 %
 % define default value(s) for volcano list file if not given
