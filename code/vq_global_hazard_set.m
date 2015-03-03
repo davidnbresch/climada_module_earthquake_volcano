@@ -61,7 +61,7 @@ function hazard=vq_global_hazard_set(vq_data,hazard_set_file,centroids,TEST_volc
 %
 %   simple check for hazard content: hist(full(hazard.intensity(find(hazard.intensity))))
 % MODIFICATION HISTORY:
-% Melanie Bieli, melanie.bieli@bluewin.ch, 20150223, initial
+% David N. Bresch, david.bresch@gmail.com, 20150302, initial
 %-
 
 hazard=[]; % init
@@ -126,15 +126,9 @@ if isempty(centroids) % local GUI
     if isequal(filename,0) || isequal(pathname,0)
         % TEST centroids
         fprintf('WARNING: Special mode, TEST centroids grid (Naples) created in %s\n',mfilename);
-        ii=0;
-        dlonlat=0.01; % crude tests: dlonlat=0.25;
-        for lon_i=13:dlonlat:15
-            for lat_i=39:dlonlat:41
-                ii=ii+1;
-                centroids.lon(ii)=lon_i;
-                centroids.lat(ii)=lat_i;
-            end
-        end
+        lon=14.426;lat=40.821; % Vesuvius
+        [X,Y]=meshgrid(lon-1:.01:lon+1,lat-2:.01:lat+1); % 2D grid
+        centroids.lon=reshape(X,numel(X),1);centroids.lat=reshape(Y,numel(X),1); % 2D grid
         centroids.centroid_ID=1:length(centroids.lon);
     else
         centroids_file=fullfile(pathname,filename);
@@ -166,10 +160,10 @@ in_centroids_poly(vq_data.Cloud_height_km<10)=0;
 
 if TEST_volcano_preselection>0
     climada_plot_world_borders; hold on
-    plot(vq_data.lon,vq_data.lat,'.b')
-    plot(vq_data.lon(in_centroids_poly),vq_data.lat(in_centroids_poly),'og')
-    plot(vq_data.lon(in_centroids_poly),vq_data.lat(in_centroids_poly),'xg')
-    plot(centroids.lon,centroids.lat,'.r')
+    plot(vq_data.lon,vq_data.lat,'.b','MarkerSize',2)
+    plot(vq_data.lon(in_centroids_poly),vq_data.lat(in_centroids_poly),'og','MarkerSize',3)
+    %plot(vq_data.lon(in_centroids_poly),vq_data.lat(in_centroids_poly),'xg')
+    plot(centroids.lon,centroids.lat,'.r','MarkerSize',1)
     axis equal
     fprintf('%i (of %i) volcanoes in range\n',sum(in_centroids_poly),length(vq_data.lon));
     in_centroids_pos=find(in_centroids_poly);
@@ -218,6 +212,31 @@ hazard.vq_data_filename = vq_data.filename;
 hazard.intensity = spalloc(hazard.event_count,length(hazard.lon),...
     ceil(hazard.event_count*length(hazard.lon)*hazard_arr_density));
 
+% init eruption parameters
+if isfield(vq_data,'Cloud_height_km')
+    H=vq_data.Cloud_height_km; % H, eruptive column height in km
+else
+    H=vq_data.lon*0+14; % default, 14 km
+end
+if isfield(vq_data,'U_vel_kmh')
+    % wind velocity U (in km/h, indicative 50-100 km/h most often)
+    U_vel=vq_data.U_vel_kmh; % km/h
+else
+    U_vel=vq_data.lon*0+50; % default, 50 km/h
+end
+if isfield(vq_data,'U_phi_rad')
+    % direction of wind in radian (-pi..pi), counterclockwise from (dx=1,dy=0), i.e. from direction East, West=pi, North=pi/2
+    U_phi=vq_data.U_phi_rad; % in rad
+else
+    U_phi=vq_data.lon*0; % default, wind eastward (westerlies dominate)
+end
+if isfield(vq_data,'tau_h')
+    % duration of the high-intensity phase of the eruption in hours
+    tau=vq_data.tau_h(event_i); % in rad
+else
+    tau=vq_data.lon*0+8; % 8h
+end
+
 t0       = clock;
 n_events = hazard.event_count;
 n_events_eff=sum(in_centroids_poly);
@@ -233,64 +252,16 @@ else
     mod_step=n_events+10;
 end
 
-cos_vq_data_lat = cos(vq_data.lat/180*pi);
-
 event_i_eff=0; % since we only process a subset
 for event_i=1:n_events
     
     if in_centroids_poly(event_i)
         
         event_i_eff=event_i_eff+1;
-                
-        % according to A. O. Gonzalez-Mellado and S. De la Cruz-Reyna, 2010: A
-        % simple semi-empirical approach to model thickness of ash-deposits for
-        % different eruption scenarios. Nat. Hazards Earth Syst. Sci., 10,
-        % 2241?2257, 2010, direct:
-        % www.nat-hazards-earth-syst-sci.net/10/2241/2010/nhess-10-2241-2010.pdf
         
-        if isfield(vq_data,'Cloud_height_km')
-            H=vq_data.Cloud_height_km(event_i); % H, eruptive column height in km
-        else
-            H=14; % default, 14 km
-        end
-        H=25;
-        rho=1100; % density of the falling material (kgm-3, indicative value 1100),
-        alpha_param=2.535-0.051*H; % the rate at which the deposit thickness decays with distance
-        Htropopause=15.5; % tropopause height in km
-        tau=48; % duration of the high-intensity phase of the eruption in hours
-        U_vel=200; % wind velocity U (in km/h, indicative 50-100 km/h most often), duration of the high-intensity phase of the eruption ? (in hours, e.g. Pinatubo 1-5h) and D (in km2/h) as follows (to distinguish between event that do and do not penetrate the stratosphere):
-        U_phi=-pi; % direction of wind in radian, counterclockwise from (dx=1,dy=0), i.e. from direction East
-             
-        if H<Htropopause
-            D=-4.189*H+114.407;
-        else % above)
-            D=52.822*H-770.17;
-        end
-        
-        for centroid_i=1:length(centroids.lon)
-            
-            % variable parameters are distance r and phi, angle between the
-            % wind direction and the vector from the ash emission center to the
-            % centroid.
-            
-            % distance to eruption center im km
-            dx=(centroids.lon(centroid_i)-vq_data.lon(event_i))*cos_vq_data_lat(event_i);
-            dy=centroids.lat(centroid_i)-vq_data.lat(event_i);
-            
-            r=sqrt(dx^2+dy^2)*111.12; % km
-            
-            phi0=atan2(dy,dx); % four quadrant arctangent in radion (-pi<=atan2(Y,X)<= pi, in degree: ./pi*180)
-            % measured counterclockwise from dx=1,dy0, i.e. atan2(0,1)=0, atan2(1,1)=pi/4, atan2(1,0)=pi/2 
-            
-            phi=phi0-U_phi;
- 
-            T=14.28*H^4*tau^(alpha_param/2) / ...
-                ( (2*D)^(1-alpha_param/2)*rho ) * ...
-                exp(-U_vel/(2*D)*r*(1-cos(phi)))*r^-alpha_param;
-            
-            hazard.intensity(event_i,centroid_i)=T;
-            
-        end % centroid_i
+        hazard.intensity(event_i,:)=sparse(vq_tephra_field_cm(centroids,...
+            vq_data.lon(event_i),vq_data.lat(event_i),...
+            H(event_i),U_vel(event_i),U_phi(event_i),tau(event_i)));
         
         % progress update
         if mod(event_i_eff,mod_step)==0
@@ -334,4 +305,5 @@ save(hazard_set_file,'hazard');
 %save(hazard_set_file,'hazard','-v7.3'); % see note on next line:
 % Warning: Variable 'hazard' cannot be saved to a MAT-file whose version is older than 7.3. To save this variable, use the -v7.3 switch.
 % to avoid this warning, the switch is used. david's comment: only shows for large hazard sets, seems to be due to huge size of hazard
-return
+
+end % vq_global_hazard_set
