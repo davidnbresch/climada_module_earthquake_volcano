@@ -130,9 +130,13 @@ if ~climada_check_matfile(volcano_list_file,volcano_list_file_mat)
         end
     end % Last_Known_Eruption
     
-    vq_data.n_volcanoes_orig=length(vq_data.lon);
+    vq_data.orig_event_flag=vq_data.lon*0+1; % indicate historic eruptions
     vq_data.ens_size=0; % no ensemble, just the original events
     vq_data.datenum=datenum(vq_data.Year,0,0);
+    
+    if ~isfield(vq_data,'duration_h')
+        vq_data.duration_h=vq_data.lon*0+1; % 1 hour
+    end
 
     fprintf('saving as %s\n',volcano_list_file_mat);
     save(volcano_list_file_mat,'vq_data');

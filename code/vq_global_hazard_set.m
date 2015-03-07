@@ -198,9 +198,8 @@ hazard.centroid_ID      = centroids.centroid_ID;
 hazard.event_count      = length(vq_data.lon);
 hazard.event_ID         = 1:hazard.event_count;
 hazard.orig_years       = orig_years;
-hazard.orig_event_count = vq_data.n_volcanoes_orig;
-hazard.orig_event_flag  = zeros(1,hazard.event_count);
-hazard.orig_event_flag(1:hazard.orig_event_count)=1;
+hazard.orig_event_count = sum(vq_data.orig_event_flag);
+hazard.orig_event_flag  = vq_data.orig_event_flag;
 hazard.yyyy             = vq_data.Year;
 hazard.datenum          = vq_data.datenum;
 hazard.vq_data_filename = vq_data.filename;
@@ -230,11 +229,11 @@ if isfield(vq_data,'U_phi_rad')
 else
     U_phi=vq_data.lon*0; % default, wind eastward (westerlies dominate)
 end
-if isfield(vq_data,'tau_h')
+if isfield(vq_data,'duration_h')
     % duration of the high-intensity phase of the eruption in hours
-    tau=vq_data.tau_h(event_i); % in rad
+    tau=vq_data.duration_h; % in hours
 else
-    tau=vq_data.lon*0+8; % 8h
+    tau=vq_data.lon*0+1; % 1h
 end
 
 t0       = clock;
@@ -242,14 +241,14 @@ n_events = hazard.event_count;
 n_events_eff=sum(in_centroids_poly);
 
 msgstr   = sprintf('processing %i (of globally %i) volcanoes',n_events_eff,n_events);
+mod_step = 10; % first time estimate after 10 volcanoes, then every 100
 if climada_global.waitbar
     fprintf('%s (updating waitbar with estimation of time remaining every 100th volcano)\n',msgstr);
     h        = waitbar(0,msgstr);
     set(h,'Name','Hazard VQ: thephra/ash thickness (cm)');
-    mod_step = 10; % first time estimate after 10 events, then every 100
 else
     fprintf('%s (waitbar suppressed)\n',msgstr);
-    mod_step=n_events+10;
+    format_str='%s';
 end
 
 event_i_eff=0; % since we only process a subset
@@ -274,20 +273,31 @@ for event_i=1:n_events
             else
                 msgstr = sprintf('est. %3.1f min left (%i/%i volcanoes)',t_projected_sec/60,event_i_eff,n_events_eff);
             end
-            waitbar(event_i_eff/n_events_eff,h,msgstr); % update waitbar
+            if climada_global.waitbar
+                waitbar(event_i_eff/n_events_eff,h,msgstr); % update waitbar
+            else
+                fprintf(format_str,msgstr);
+                format_str=[repmat('\b',1,length(msgstr)) '%s'];
+            end
         end
         
     end % in_centroids_poly
     
 end %event_i
-if exist('h','var'),close(h);end % dispose waitbar
+if climada_global.waitbar
+    close(h) % dispose waitbar
+else
+    fprintf(format_str,''); % move carriage to begin of line
+end
 
 t_elapsed = etime(clock,t0);
 msgstr    = sprintf('processing %i volcanoes took %3.2f min (%3.4f sec/event)',n_events_eff,t_elapsed/60,t_elapsed/n_events_eff);
 fprintf('%s\n',msgstr);
 
-% number of derived tracks per original one
-event_frequency = 1/(orig_years*(vq_data.ens_size+1));
+hazard
+
+% number of probabilistic eruptions per original one
+event_frequency = 1/(hazard.orig_years*(hazard.orig_event_count/hazard.event_count));
 fprintf('%i original, %i probabilistic years, event frequency = %f\n',orig_years,orig_years*(vq_data.ens_size+1),event_frequency);
 
 % not transposed, just regular
