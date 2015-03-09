@@ -199,9 +199,9 @@ hazard.event_count      = length(vq_data.lon);
 hazard.event_ID         = 1:hazard.event_count;
 hazard.orig_years       = orig_years;
 hazard.orig_event_count = sum(vq_data.orig_event_flag);
-hazard.orig_event_flag  = vq_data.orig_event_flag;
-hazard.yyyy             = vq_data.Year;
-hazard.datenum          = vq_data.datenum;
+hazard.orig_event_flag  = vq_data.orig_event_flag';
+hazard.yyyy             = vq_data.Year';
+hazard.datenum          = vq_data.datenum';
 hazard.vq_data_filename = vq_data.filename;
 
 
@@ -294,10 +294,8 @@ t_elapsed = etime(clock,t0);
 msgstr    = sprintf('processing %i volcanoes took %3.2f min (%3.4f sec/event)',n_events_eff,t_elapsed/60,t_elapsed/n_events_eff);
 fprintf('%s\n',msgstr);
 
-hazard
-
 % number of probabilistic eruptions per original one
-event_frequency = 1/(hazard.orig_years*(hazard.orig_event_count/hazard.event_count));
+event_frequency = 1/(hazard.orig_years*(hazard.event_count/hazard.orig_event_count));
 fprintf('%i original, %i probabilistic years, event frequency = %f\n',orig_years,orig_years*(vq_data.ens_size+1),event_frequency);
 
 % not transposed, just regular
