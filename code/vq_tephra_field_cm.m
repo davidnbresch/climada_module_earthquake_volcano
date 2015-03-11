@@ -22,7 +22,7 @@ function T=vq_tephra_field_cm(centroids,lon,lat,H,U_vel,U_phi,tau,check_plot)
 %
 %   Some PARAMETERS set in code, see below, also defaults
 %
-%   previous step: see vq_global_hazard_set
+%   previous step: see vq_global_hazard_set (usually colled from there)
 % CALLING SEQUENCE:
 %   T=vq_tephra_field_cm(centroids,lon,lat,H,U_vel,U_phi,tau)
 % EXAMPLE:

@@ -8,7 +8,7 @@ function hazard=vq_global_hazard_set(vq_data,hazard_set_file,centroids,TEST_volc
 %   generate a volcano (VQ) hazard event set, starting from volcano data
 %   calculating ash thickness (distance and depth).
 %
-%   previous step: see vq_volcano_list_read
+%   previous step: see vq_volcano_list_read and vq_global_probabilistic
 % CALLING SEQUENCE:
 %   hazard=vq_global_hazard_set(vq_data,hazard_set_file,centroids)
 % EXAMPLE:
