@@ -71,6 +71,7 @@ function hazard=eq_global_hazard_set(eq_data,hazard_set_file,centroids,TEST_epic
 % David N. Bresch, david.bresch@gmail.com, 20141012
 % Melanie Bieli, melanie.bieli@bluewin.ch, 20141223, added correction,a1,a2,a3,a4
 % Melanie Bieli, melanie.bieli@bluewin.ch, 20150120, hazard_arr_density=0.01
+% David N. Bresch, david.bresch@gmail.com, 20150819, climada_global.centroids_dir introduced
 %-
 
 hazard=[]; % init
@@ -138,7 +139,7 @@ end
 
 % prompt for centroids if not given
 if isempty(centroids) % local GUI
-    centroids_default    = [climada_global.system_dir filesep '*.mat'];
+    centroids_default    = [climada_global.centroids_dir filesep '*.mat'];
     [filename, pathname] = uigetfile({'*.mat;*.xls'},'Select centroids (.mat or .xls):',centroids_default);
     if isequal(filename,0) || isequal(pathname,0)
         % TEST centroids

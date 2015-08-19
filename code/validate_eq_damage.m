@@ -80,6 +80,7 @@ function eq_data_calculated_damage = validate_eq_damage(eq_data, check_plot)
 % MODIFICATION HISTORY:
 % Melanie Bieli, melanie.bieli@bluewin.ch, 20141212, initial
 % Melanie Bieli, melanie.bieli@bluewin.ch, 20150123, minor changes
+% David N. Bresch, david.bresch@gmail.com, 20150819, climada_global.centroids_dir introduced
 %-
 
 % init global variables
@@ -95,7 +96,6 @@ if ~exist('check_plot','var'),check_plot=0;end
 
 % set directories
 entities_data_dir = [climada_global.data_dir filesep 'entities'];
-centroids_data_dir = [climada_global.data_dir filesep 'system'];
 eq_data_dir=[fileparts(fileparts(mfilename('fullpath'))) filesep 'data' filesep 'epicenters'];
 
 % prompt for eq_data if not given {'*.mat';'*.xls*'}
@@ -161,7 +161,7 @@ for i=start_index:end_index
     % climada_create_GDP_entity
     [~,country_ISO3] = climada_country_name(eq_data.country(i)); % check name and ISO3
     centroids_string = sprintf('%s_%s_centroids.mat',country_ISO3,char(eq_data.country(i)));
-    centroids_file = [centroids_data_dir filesep centroids_string];
+    centroids_file = [climada_global.centroids_dir filesep centroids_string];
     entity_string = sprintf('%s_%s_entity.mat',country_ISO3,char(eq_data.country(i)));
     entity_file = [entities_data_dir filesep entity_string];
     if or(~exist(centroids_file,'file'),~exist(entity_file,'file'));

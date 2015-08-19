@@ -62,6 +62,7 @@ function hazard=vq_global_hazard_set(vq_data,hazard_set_file,centroids,TEST_volc
 %   simple check for hazard content: hist(full(hazard.intensity(find(hazard.intensity))))
 % MODIFICATION HISTORY:
 % David N. Bresch, david.bresch@gmail.com, 20150302, initial
+% David N. Bresch, david.bresch@gmail.com, 20150819, climada_global.centroids_dir introduced
 %-
 
 hazard=[]; % init
@@ -121,7 +122,7 @@ end
 
 % prompt for centroids if not given
 if isempty(centroids) % local GUI
-    centroids_default    = [climada_global.system_dir filesep '*.mat'];
+    centroids_default    = [climada_global.centroids_dir filesep '*.mat'];
     [filename, pathname] = uigetfile({'*.mat;*.xls'},'Select centroids (.mat or .xls):',centroids_default);
     if isequal(filename,0) || isequal(pathname,0)
         % TEST centroids
