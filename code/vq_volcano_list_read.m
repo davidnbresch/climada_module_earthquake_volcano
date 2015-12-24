@@ -96,8 +96,8 @@ if ~exist(volcano_list_file,'file')
     volcano_list_file=NGDC_volcano_list_file_default;
     [filename, pathname] = uigetfile(volcano_list_file,'Choose volcano database:');
     if isequal(filename,0) || isequal(pathname,0)
-        fprintf('No volcano database selected, consider downloading eq_global module again\n');
-        fprintf('> See https://github.com/davidnbresch/climada_module_eq_global\n');
+        fprintf('No volcano database selected, consider downloading earthquake_volcano module again\n');
+        fprintf('> See https://github.com/davidnbresch/climada_module_earthquake_volcano\n');
         return; % cancel
     else
         volcano_list_file=fullfile(pathname,filename);

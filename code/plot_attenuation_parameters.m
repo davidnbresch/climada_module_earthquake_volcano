@@ -6,7 +6,7 @@ function plot_attenuation_parameters(mag,attenuation_file,dep)
 %   plot_attenuation_parameters
 % PURPOSE:
 %   plot the attenuation functions defined by the sets of parameters in
-%   climada_module_eq_global/data/system/attenuation_parameters.xlsx, for a
+%   earthquake_volcano/data/system/attenuation_parameters.xlsx, for a
 %   given magnitude
 % CALLING SEQUENCE:
 %   plot_attenuation_parameters(magnitude, filename)

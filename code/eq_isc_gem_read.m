@@ -68,8 +68,8 @@ if isempty(isc_gem_file),isc_gem_file=isc_gem_file_default;end
 if ~exist(isc_gem_file,'file')
     [filename, pathname] = uigetfile(isc_gem_file_default,'Choose ISC-GEM epicenter database:');
     if isequal(filename,0) || isequal(pathname,0)
-        fprintf('No ISC-GEM epicenter database selected, consider downloading eq_global module again\n');
-        fprintf('> See https://github.com/davidnbresch/climada_module_eq_global\n');
+        fprintf('No ISC-GEM epicenter database selected, consider downloading earthquake_volcano module again\n');
+        fprintf('> See https://github.com/davidnbresch/climada_module_earthquake_volcano\n');
         return; % cancel
     else
         isc_gem_file=fullfile(pathname,filename);
