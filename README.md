@@ -1,5 +1,6 @@
-climada_module_eq_global
-========================
+climada_module_earthquake_volcano
+=================================
+formerly named climada_module_eq_global until 20151224
 
 Global earthquake model. See eq_global/doc for documentation.
 
