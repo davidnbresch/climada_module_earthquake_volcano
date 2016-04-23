@@ -40,6 +40,7 @@ function vq_data=vq_global_probabilistic(vq_data,ens_size,check_plot)
 %       (many) more eruptions, plus U_vel_kmh an U_vel_rad added
 % MODIFICATION HISTORY:
 % David N. Bresch, david.bresch@gmail.com, 20150307, initial
+% David N. Bresch, david.bresch@gmail.com, 20160423, rand('seed',0) --> rng(0)
 %-
 
 %global climada_global
@@ -206,7 +207,8 @@ vq_data.ens_size=length(vq_data.lon)/n_orig_eruptions-1;
 vq_data.orig_event_flag(n_orig_eruptions+1:end)=0;
 
 % generate random starting points for ensemble members
-if force_seed_0,rand('seed',0),end % always the same seed, in order to allow for reproduceability in exercises
+%if force_seed_0,rand('seed',0),end % until 20160423
+if force_seed_0,rng(0),end % always the same seed, in order to allow for reproduceability in exercises
 
 % Note: rand generates uniformly distributed random numbers ]0..1[
 % -1..1: 2*(rand(1,(ens_size-1)*n_month_eruptions)-0.5);

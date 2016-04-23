@@ -34,6 +34,7 @@ function eq_data=eq_global_probabilistic(eq_data_in,ens_size,check_plot)
 %       mag(line_i) : magnitude
 % MODIFICATION HISTORY:
 % David N. Bresch, david.bresch@gmail.com, 20141010, initial
+% David N. Bresch, david.bresch@gmail.com, 20160423, rand('seed',0) --> rng(0)
 %-
 
 eq_data=[]; % init
@@ -64,7 +65,8 @@ mag_mul = 0.5; % magnitude multiplier (works analog to depth)
 n_epicenters=length(eq_data_in.mag);
 
 % generate random starting points for ensemble members
-if force_seed_0,rand('seed',0),end % always the same seed, in order to allow for reproduceability in exercises
+%if force_seed_0,rand('seed',0),end % until 20160423
+if force_seed_0,rng(0),end % always the same seed, in order to allow for reproduceability in exercises
 dlon =   geo_amp*2*(rand(1,ens_size*n_epicenters)-0.5); % rand: uniformly distributed random numbers
 dlat =   geo_amp*2*(rand(1,ens_size*n_epicenters)-0.5);
 ddep = 1+dep_mul*2*(rand(1,ens_size*n_epicenters)-0.5);
