@@ -22,3 +22,5 @@ data/volcanoes/GVP_Volcano_List_OLD.xls
 data/volcanoes/GVP_Volcano_List.mat
 
 data/volcanoes/NGDC_SignificantVolcanicEvents_prob.mat
+
+.DS_Store
