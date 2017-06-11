@@ -29,6 +29,8 @@ function hazard=vq_global_hazard_set(vq_data,hazard_set_file,centroids,TEST_volc
 %       climada_centroids_read) or the filename of an Excel file (the original
 %       input to climada_centroids_read) which holds the centroids, in
 %       which case climada_centroids_read is called.
+%       OR: an entity, in which case the entity.assets.lat and
+%       entity.assets.lon are used as centroids.
 %       > promted for .mat or .xls filename if not given
 %       NOTE: if you then select Cancel, a regular default grid is used
 %       (TEST mode), see hard-wired definition in code (a rectangular area in California)
@@ -63,6 +65,8 @@ function hazard=vq_global_hazard_set(vq_data,hazard_set_file,centroids,TEST_volc
 % MODIFICATION HISTORY:
 % David N. Bresch, david.bresch@gmail.com, 20150302, initial
 % David N. Bresch, david.bresch@gmail.com, 20150819, climada_global.centroids_dir introduced
+% David N. Bresch, david.bresch@gmail.com, 20170611, allow for entity instead of centroids
+% David N. Bresch, david.bresch@gmail.com, 20160611, climada_global.save_file_version
 %-
 
 hazard=[]; % init
@@ -93,6 +97,8 @@ hazard_reference_year = climada_global.present_reference_year; % does not really
 %
 % define radius around centroids we search for volcanoes
 EPM=2; % in degrees, i.e. =2 means about 220 km
+%
+MarkerSize=5; % the default marker size for plots
 
 % prompt for vq_data if not given
 if isempty(vq_data) % local GUI
@@ -111,7 +117,7 @@ end
 
 % prompt for hazard_set_file if not given
 if isempty(hazard_set_file) && TEST_volcano_preselection<2 % local GUI
-    hazard_set_file      = [climada_global.data_dir filesep 'hazards' filesep 'VQXX_hazard.mat'];
+    hazard_set_file      = [climada_global.data_dir filesep 'hazards' filesep 'XXX_glb_VQ.mat'];
     [filename, pathname] = uiputfile(hazard_set_file, 'Save VQ hazard set as:');
     if isequal(filename,0) || isequal(pathname,0)
         return; % cancel
@@ -119,6 +125,10 @@ if isempty(hazard_set_file) && TEST_volcano_preselection<2 % local GUI
         hazard_set_file = fullfile(pathname,filename);
     end
 end
+
+% complete path, if missing
+[fP,fN,fE]=fileparts(hazard_set_file);
+if isempty(fP),hazard_set_file=[climada_global.data_dir filesep 'hazards' filesep fN fE];end
 
 % prompt for centroids if not given
 if isempty(centroids) % local GUI
@@ -144,6 +154,23 @@ if isempty(centroids) % local GUI
     end
 end
 
+if isfield(centroids,'assets')
+    % centroids contains in fact an entity
+    entity=centroids; centroids=[]; % silly switch, but fastest
+    centroids.lat =entity.assets.lat;
+    centroids.lon=entity.assets.lon;
+    centroids.centroid_ID=1:length(entity.assets.lon);
+    % treat optional fields
+    if isfield(entity.assets,'distance2coast_km'),centroids.distance2coast_km=entity.assets.distance2coast_km;end
+    if isfield(entity.assets,'elevation_m'),centroids.elevation_m=entity.assets.elevation_m;end
+    if isfield(entity.assets,'country_name'),centroids.country_name=entity.assets.country_name;end
+    if isfield(entity.assets,'admin0_name'),centroids.admin0_name=entity.assets.admin0_name;end
+    if isfield(entity.assets,'admin0_ISO3'),centroids.admin0_ISO3=entity.assets.admin0_ISO3;end
+    if isfield(entity.assets,'admin1_name'),centroids.admin1_name=entity.assets.admin1_name;end
+    if isfield(entity.assets,'admin1_code'),centroids.admin1_code=entity.assets.admin1_code;end
+    clear entity
+end
+
 if ~isstruct(centroids) % load, if filename given
     centroids_file=centroids;centroids=[];
     fprintf('centroids read from %s\n',centroids_file);
@@ -161,11 +188,11 @@ in_centroids_poly(vq_data.Cloud_height_km<10)=0;
 
 if TEST_volcano_preselection>0
     climada_plot_world_borders; hold on
-    plot(vq_data.lon,vq_data.lat,'.b','MarkerSize',2)
-    plot(vq_data.lon(in_centroids_poly),vq_data.lat(in_centroids_poly),'og','MarkerSize',3)
+    plot(vq_data.lon,vq_data.lat,'.b','MarkerSize',MarkerSize*4) % was 2
+    plot(vq_data.lon(in_centroids_poly),vq_data.lat(in_centroids_poly),'.r','MarkerSize',MarkerSize*4) % was 3
     %plot(vq_data.lon(in_centroids_poly),vq_data.lat(in_centroids_poly),'xg')
-    plot(centroids.lon,centroids.lat,'.r','MarkerSize',1)
-    axis equal
+   % plot(centroids.lon,centroids.lat,'.r','MarkerSize',0.1) % was 1
+    %axis equal
     fprintf('%i (of %i) volcanoes in range\n',sum(in_centroids_poly),length(vq_data.lon));
     in_centroids_pos=find(in_centroids_poly);
     for i=1:length(in_centroids_pos)
@@ -310,9 +337,6 @@ hazard.date              = datestr(now);
 hazard.units             = 'cm';
 
 fprintf('saving VQ hazard set as %s\n',hazard_set_file);
-save(hazard_set_file,'hazard');
-%save(hazard_set_file,'hazard','-v7.3'); % see note on next line:
-% Warning: Variable 'hazard' cannot be saved to a MAT-file whose version is older than 7.3. To save this variable, use the -v7.3 switch.
-% to avoid this warning, the switch is used. david's comment: only shows for large hazard sets, seems to be due to huge size of hazard
+save(hazard_set_file,'hazard',climada_global.save_file_version) % for HDF5 format (portability)
 
 end % vq_global_hazard_set

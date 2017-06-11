@@ -77,6 +77,7 @@ function hazard=eq_global_hazard_set(eq_data,hazard_set_file,centroids,TEST_epic
 % Melanie Bieli, melanie.bieli@bluewin.ch, 20150120, hazard_arr_density=0.01
 % David N. Bresch, david.bresch@gmail.com, 20150819, climada_global.centroids_dir introduced
 % David N. Bresch, david.bresch@gmail.com, 20160529, parfor speedup, factor 3-5
+% David N. Bresch, david.bresch@gmail.com, 20160611, climada_global.save_file_version
 %-
 
 hazard=[]; % init
@@ -115,6 +116,9 @@ hazard_reference_year = climada_global.present_reference_year; % does not really
 % the earthquake epicenter preselection margin, i.e. to widen the box
 % around the centroids by EPM degrees.
 EPM=2; % in degrees, default=2 (approx. 200km)
+%
+MarkerSize=5; % the default marker size for plots
+
 
 % prompt for eq_data if not given
 if isempty(eq_data) % local GUI
@@ -133,7 +137,7 @@ end
 
 % prompt for hazard_set_file if not given
 if isempty(hazard_set_file) && TEST_epicenter_preselection<2 % local GUI
-    hazard_set_file      = [climada_global.data_dir filesep 'hazards' filesep 'EQXX_hazard.mat'];
+    hazard_set_file      = [climada_global.data_dir filesep 'hazards' filesep 'XXX_glb_EQ.mat'];
     [filename, pathname] = uiputfile(hazard_set_file, 'Save EQ hazard set as:');
     if isequal(filename,0) || isequal(pathname,0)
         return; % cancel
@@ -205,8 +209,8 @@ centroids_edges_y = [centroids_rect(3), centroids_rect(4), centroids_rect(4), ce
 in_centroids_poly = inpolygon(eq_data.glon,eq_data.glat,centroids_edges_x,centroids_edges_y);
 if TEST_epicenter_preselection>0
     climada_plot_world_borders; hold on
-    plot(eq_data.glon,eq_data.glat,'.b')
-    plot(eq_data.glon(in_centroids_poly),eq_data.glat(in_centroids_poly),'.g')
+    plot(eq_data.glon,eq_data.glat,'.b','MarkerSize',MarkerSize*4)
+    plot(eq_data.glon(in_centroids_poly),eq_data.glat(in_centroids_poly),'.r','MarkerSize',MarkerSize*4+1)
     if TEST_epicenter_preselection>1
         fprintf('STOP after epicenter preselection\n');
         return
@@ -315,7 +319,6 @@ hazard.comment           = sprintf('EQ hazard event set, generated %s',datestr(n
 hazard.date              = datestr(now);
 
 fprintf('saving EQ hazard set as %s\n',hazard_set_file);
-save(hazard_set_file,'hazard','-v7.3'); % see note on next line:
-% Warning: Variable 'hazard' cannot be saved to a MAT-file whose version is older than 7.3. To save this variable, use the -v7.3 switch.
-% to avoid this warning, the switch is used. david's comment: only shows for large hazard sets, seems to be due to huge size of hazard
-return
+save(hazard_set_file,'hazard',climada_global.save_file_version) % for HDF5 format (portability)
+
+end % eq_global_hazard_set
