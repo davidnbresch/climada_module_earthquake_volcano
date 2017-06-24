@@ -52,19 +52,19 @@ function intensity_at_centroids = eq_global_attenuation(glat,glon,mag,centroids,
 % Melanie Bieli, melanie.bieli@bluewin.ch, 20141106
 %-
 
-%% initialize output
+% initialize output
 intensity_at_centroids = []; 
 
-%% default values for attenuation parameters: dep, correction, a1, a2, a3, a4
+% global climada_global
+% if ~climada_init_vars,return;end % init/import global variables
+
+% default values for attenuation parameters: dep, correction, a1, a2, a3, a4
 if ~exist('dep','var') || isempty(dep), dep = 0; end
 if ~exist('correction','var') || isempty(correction), correction = 0; end
 if ~exist('a1','var') || isempty(a1), a1 = 1.7; end
 if ~exist('a2','var') || isempty(a2), a2 = 1.5; end
 if ~exist('a3','var') || isempty(a3), a3 = 1.1726; end
 if ~exist('a4','var') || isempty(a4), a4 = 0.00106; end
-
-%global climada_global % currently not used
-if ~climada_init_vars, return; end
 
 if ~exist('glat','var'),return; end
 if ~exist('glon','var'),return; end

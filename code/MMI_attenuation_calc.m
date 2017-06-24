@@ -4,7 +4,7 @@ function MMI = MMI_attenuation_calc(mag, dist, dep, correction, a1, a2, a3, a4, 
 % MODULE:
 % eq_global
 % NAME:
-%   simple_eq_MMI
+%   MMI_attenuation_calc
 % PURPOSE:
 %   calculate MMI at a given distance from the epicenter 
 % CALLING SEQUENCE:
@@ -33,16 +33,16 @@ function MMI = MMI_attenuation_calc(mag, dist, dep, correction, a1, a2, a3, a4, 
 % Melanie Bieli, melanie.bieli@bluewin.ch, 20141209, added correction parameter
 % Melanie Bieli, melanie.bieli@bluewin.ch, 20150118, minor clean-up, renaming
 
-%% default values for attenuation parameters: dep, correction, a1, a2, a3, a4, b
+% default values for attenuation parameters: dep, correction, a1, a2, a3, a4, b
 if ~exist('dep','var') || isempty(dep), dep = 0; end
 if ~exist('correction','var') || isempty(correction), correction = 0; end
 if ~exist('a1','var') || isempty(a1), a1 = 1.7; end
 if ~exist('a2','var') || isempty(a2), a2 = 1.5; end
 if ~exist('a3','var') || isempty(a3), a3 = 1.1726; end
 if ~exist('a4','var') || isempty(a4), a4 = 0.00106; end
-if ~exist('b','var') || isempty(b), b = 0; end
+if ~exist('b','var')  || isempty(b), b = 0; end
 
-%% compute the attenuation equation 
+% compute the attenuation equation 
 % MMI is kept below a maximum value defined by the equation 
 % I_0 = 1.5*(mag - 1), where I_0 is the epicentral intensity (in MMI)
 % and mag the Richter magnitude of the earthquake
@@ -53,11 +53,3 @@ MMI = a1 + a2 * mag - a3 * log(dist+correction) - a4 * dist + b*dep;
 if MMI > maximum_MMI, MMI = maximum_MMI; end
 
 end
-
-
-
-
-        
- 
- 
-

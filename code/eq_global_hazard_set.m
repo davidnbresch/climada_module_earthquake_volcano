@@ -12,7 +12,7 @@ function hazard=eq_global_hazard_set(eq_data,hazard_set_file,centroids,TEST_epic
 %   previous step: see eq_global_probabilistic or eq_isc_gem_read (or
 %   eq_centennial_read, or eq_signieq_read)
 % CALLING SEQUENCE:
-%   
+%
 %   hazard=eq_global_hazard_set(eq_data,hazard_set_file,centroids)
 % EXAMPLE:
 %   eq_data=eq_global_probabilistic(eq_isc_gem_read); % global
@@ -245,22 +245,11 @@ hazard.units            = 'MMI';
 % fprintf('%s: spalloc(%i,%i,%i)\n',mfilename,n_events,n_centroids,...
 %     ceil(n_events*n_centroids*hazard_arr_density));
 intensity = spalloc(n_events,n_centroids,...
-     ceil(n_events*n_centroids*hazard_arr_density));
+    ceil(n_events*n_centroids*hazard_arr_density));
 %intensity = zeros(n_events,n_centroids);
 
 t0       = clock;
 n_events_eff=sum(in_centroids_poly);
-
-% msgstr   = sprintf('processing %i (of globally %i) epicenters',n_events_eff,n_events);
-% if climada_global.waitbar
-%     fprintf('%s (updating waitbar with estimation of time remaining every 100th epicenter)\n',msgstr);
-%     h        = waitbar(0,msgstr);
-%     set(h,'Name','Hazard EQ: shaking intensity (MMI)');
-%     mod_step = 10; % first time estimate after 10 events, then every 100
-% else
-%     fprintf('%s (waitbar suppressed)\n',msgstr);
-%     mod_step=n_events+10;
-% end
 
 % make explicit and direct, speeds up parfor
 eq_data_glat=eq_data.glat;
@@ -269,37 +258,30 @@ eq_data_mag=eq_data.mag;
 eq_data_dep=eq_data.dep;
 
 %event_i_eff=0; % since we only process a subset, for progress display, disabled
-parfor event_i=1:n_events
-    
-    if in_centroids_poly(event_i)
-        
-        % event_i_eff=event_i_eff+1; % for progress display, disabled
-        
-        intensity(event_i,:)=eq_global_attenuation(eq_data_glat(event_i),...
-            eq_data_glon(event_i),eq_data_mag(event_i),...
-            centroids, 0, eq_data_dep(event_i), correction, a1,a2,a3,a4,b);
-        
-        % no sequential progress reported in parfor
-        %         if mod(event_i_eff,mod_step)==0
-        %             mod_step          = 100;
-        %             t_elapsed   = etime(clock,t0)/event_i_eff;
-        %             events_remaining  = n_events_eff-event_i_eff;
-        %             t_projected_sec   = t_elapsed*events_remaining;
-        %             if t_projected_sec<60
-        %                 msgstr = sprintf('est. %3.0f sec left (%i/%i epicenters)',t_projected_sec,   event_i_eff,n_events_eff);
-        %             else
-        %                 msgstr = sprintf('est. %3.1f min left (%i/%i epicenters)',t_projected_sec/60,event_i_eff,n_events_eff);
-        %             end
-        %             waitbar(event_i_eff/n_events_eff,h,msgstr); % update waitbar
-        %         end
-        
-    end % in_centroids_poly
-    
-end %event_i
+if climada_global.parfor
+    parfor event_i=1:n_events
+        if in_centroids_poly(event_i)
+            % event_i_eff=event_i_eff+1; % for progress display, disabled
+            intensity(event_i,:)=eq_global_attenuation(eq_data_glat(event_i),...
+                eq_data_glon(event_i),eq_data_mag(event_i),...
+                centroids, 0, eq_data_dep(event_i), correction, a1,a2,a3,a4,b);
+        end % in_centroids_poly
+    end %event_i
+else
+    climada_progress2stdout; % init, see terminate below
+    for event_i=1:n_events
+        if in_centroids_poly(event_i)
+            % event_i_eff=event_i_eff+1; % for progress display, disabled
+            intensity(event_i,:)=eq_global_attenuation(eq_data_glat(event_i),...
+                eq_data_glon(event_i),eq_data_mag(event_i),...
+                centroids, 0, eq_data_dep(event_i), correction, a1,a2,a3,a4,b);
+            climada_progress2stdout(event_i,n_events,100,'approximate[!] events'); % update
+        end % in_centroids_poly
+    end %event_i
+    climada_progress2stdout(0); % terminate
+end % climada_global.parfor
 
 hazard.intensity=sparse(intensity);
-
-%if exist('h','var'),close(h);end % dispose waitbar
 
 t_elapsed = etime(clock,t0);
 msgstr    = sprintf('processing %i epicenters took %3.2f min (%3.4f sec/event)',n_events_eff,t_elapsed/60,t_elapsed/n_events_eff);
@@ -317,6 +299,7 @@ hazard.peril_ID          = 'EQ';
 hazard.filename          = hazard_set_file;
 hazard.comment           = sprintf('EQ hazard event set, generated %s',datestr(now));
 hazard.date              = datestr(now);
+hazard.units             = 'MMI';
 
 fprintf('saving EQ hazard set as %s\n',hazard_set_file);
 save(hazard_set_file,'hazard',climada_global.save_file_version) % for HDF5 format (portability)
