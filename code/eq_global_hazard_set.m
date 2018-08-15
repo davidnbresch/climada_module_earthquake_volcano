@@ -19,6 +19,13 @@ function hazard=eq_global_hazard_set(eq_data,hazard_set_file,centroids,TEST_epic
 %   centroids=climada_centroids_load('USFL_MiamiDadeBrowardPalmBeach');
 %   hazard=eq_global_hazard_set(eq_data,'_EQ_TEST',centroids);
 %   %hazard=eq_global_hazard_set(eq_global_probabilistic(eq_isc_gem_read))
+%
+%   % all in a few lines for EQ in Nepal
+%   eq_data=eq_global_probabilistic(eq_isc_gem_read); % global
+%   entity=climada_entity_country('Nepal');
+%   hazard=eq_global_hazard_set(eq_data,'NPL_glb_EQ',entity);
+%   entity.assets.centroid_index=1:length(entity.assets.lon); % instead of entity_assets_encode
+%   EDS=climada_EDS_calc(entity,hazard);climada_EDS_DFC(EDS); % calc and  plot damage
 % INPUTS:
 % OPTIONAL INPUT PARAMETERS:
 %   eq_data: a structure with EQ epicenters, see eq_isc_gem_read
@@ -78,7 +85,7 @@ function hazard=eq_global_hazard_set(eq_data,hazard_set_file,centroids,TEST_epic
 % David N. Bresch, david.bresch@gmail.com, 20150819, climada_global.centroids_dir introduced
 % David N. Bresch, david.bresch@gmail.com, 20160529, parfor speedup, factor 3-5
 % David N. Bresch, david.bresch@gmail.com, 20160611, climada_global.save_file_version
-%-
+% David N. Bresch, david.bresch@gmail.com, 20180816, exmple for country NPL
 
 hazard=[]; % init
 
