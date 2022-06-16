@@ -85,9 +85,9 @@ max_centroids_dist = 150; % max distance to epicenter we calculate intensity (in
 % of cosines (see http://en.wikipedia.org/wiki/Great-circle_distance)
 % Calculates the radial distance between the epicenter and all centroids
 R_mean_Earth = 6371;    % the Earth's mean radius (in km)
-glat_rad = degtorad(glat);
-glon_rad = degtorad(glon);
-raddist = acos(sin(glat_rad)*sin(degtorad(centroids.lat)) + cos(glat_rad)*cos(degtorad(centroids.lat)).*cos(degtorad(centroids.lon)-glon_rad));
+glat_rad = deg2rad(glat);
+glon_rad = deg2rad(glon);
+raddist = acos(sin(glat_rad)*sin(deg2rad(centroids.lat)) + cos(glat_rad)*cos(deg2rad(centroids.lat)).*cos(deg2rad(centroids.lon)-glon_rad));
 if raddist < 0 
    raddist = raddist + pi;
 end

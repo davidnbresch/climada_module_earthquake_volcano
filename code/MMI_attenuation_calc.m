@@ -7,6 +7,9 @@ function MMI = MMI_attenuation_calc(mag, dist, dep, correction, a1, a2, a3, a4, 
 %   MMI_attenuation_calc
 % PURPOSE:
 %   calculate MMI at a given distance from the epicenter 
+%
+%   WARNING: does NO variable check for speed-up, i.e. ALL parameters need
+%   to be defined
 % CALLING SEQUENCE:
 %   MMI=MMI_attenuation_calc(mag, dist, correction,a1, a2, a3, a4)
 % EXAMPLE:
@@ -32,15 +35,8 @@ function MMI = MMI_attenuation_calc(mag, dist, dep, correction, a1, a2, a3, a4, 
 % Melanie Bieli, melanie.bieli@bluewin.ch, 20141116
 % Melanie Bieli, melanie.bieli@bluewin.ch, 20141209, added correction parameter
 % Melanie Bieli, melanie.bieli@bluewin.ch, 20150118, minor clean-up, renaming
-
-% default values for attenuation parameters: dep, correction, a1, a2, a3, a4, b
-if ~exist('dep','var') || isempty(dep), dep = 0; end
-if ~exist('correction','var') || isempty(correction), correction = 0; end
-if ~exist('a1','var') || isempty(a1), a1 = 1.7; end
-if ~exist('a2','var') || isempty(a2), a2 = 1.5; end
-if ~exist('a3','var') || isempty(a3), a3 = 1.1726; end
-if ~exist('a4','var') || isempty(a4), a4 = 0.00106; end
-if ~exist('b','var')  || isempty(b), b = 0; end
+% David N. Bresch, dbresch@ethz.ch, 20220616, speed-up, no vars checked
+% David N. Bresch, dbresch@ethz.ch, 20220616, speed-up, one line for all
 
 % compute the attenuation equation 
 % MMI is kept below a maximum value defined by the equation 
@@ -48,8 +44,11 @@ if ~exist('b','var')  || isempty(b), b = 0; end
 % and mag the Richter magnitude of the earthquake
 % Source: Y-X. Hu, S-C. Liu, W. Dong: Earthquake Engineering
 
-maximum_MMI = 1.5*(mag-1);
-MMI = a1 + a2 * mag - a3 * log(dist+correction) - a4 * dist + b*dep;
-if MMI > maximum_MMI, MMI = maximum_MMI; end
+% direclty below replaced with one line further below
+%maximum_MMI = 1.5*(mag-1);
+%MMI = a1 + a2 * mag - a3 * log(dist+correction) - a4 * dist + b*dep;
+%if MMI > maximum_MMI, MMI = maximum_MMI; end
 
-end
+MMI = min( ...
+    a1 + a2 * mag - a3 * log(dist+correction) - a4 * dist + b*dep, ...
+    1.5*(mag-1) );
